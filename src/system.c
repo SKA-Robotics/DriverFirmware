@@ -23,6 +23,8 @@ void SystemClock_Config(void) {
 void MX_GPIO_Init(void) {
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_AFIO_CLK_ENABLE();
+
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
     GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_3 // UART
@@ -32,7 +34,7 @@ void MX_GPIO_Init(void) {
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM,
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1; // ADC
+    GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_4; // ADC
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -47,8 +49,11 @@ void MX_GPIO_Init(void) {
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+    AFIO->MAPR |= AFIO_MAPR_SWJ_CFG_JTAGDISABLE | AFIO_MAPR_SPI1_REMAP;
+
     GPIO_InitStruct.Pin = GPIO_PIN_15; // SPI: CS3 (Encoder)
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
 }
@@ -69,7 +74,7 @@ void MX_TIM2_Init(void) {
 void MX_PWM_Init(void) {
     __HAL_RCC_TIM1_CLK_ENABLE();
     htim1.Instance = TIM1;
-    htim1.Init.Period = (1 << 10) - 1;
+    htim1.Init.Period = MAX_PWM;
     htim1.Init.Prescaler = 1;
     htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -108,7 +113,7 @@ void MX_ADC_Init(void) {
     __HAL_RCC_ADC1_CLK_ENABLE();
     RCC_PeriphCLKInitTypeDef adcClk_InitStruct = {
         .PeriphClockSelection = RCC_PERIPHCLK_ADC,
-        .AdcClockSelection = RCC_ADCPCLK2_DIV8,
+        .AdcClockSelection = RCC_ADCPCLK2_DIV4,
     };
     hadc1.Instance = ADC1;
     hadc1.Init.ContinuousConvMode = ENABLE;
@@ -124,15 +129,21 @@ void MX_ADC_Init(void) {
     ADC_ChannelConfTypeDef channel0InitStruct = {
         .Channel = ADC_CHANNEL_0,
         .Rank = ADC_REGULAR_RANK_1,
-        .SamplingTime = ADC_SAMPLETIME_13CYCLES_5,
+        .SamplingTime = ADC_SAMPLETIME_28CYCLES5_SMPR1ALLCHANNELS,
     };
     ADC_ChannelConfTypeDef channel1InitStruct = {
         .Channel = ADC_CHANNEL_1,
         .Rank = ADC_REGULAR_RANK_2,
-        .SamplingTime = ADC_SAMPLETIME_13CYCLES_5,
+        .SamplingTime = ADC_SAMPLETIME_28CYCLES5_SMPR1ALLCHANNELS,
+    };
+    ADC_ChannelConfTypeDef channel2InitStruct = {
+        .Channel = ADC_CHANNEL_4,
+        .Rank = ADC_REGULAR_RANK_3,
+        .SamplingTime = ADC_SAMPLETIME_28CYCLES5_SMPR1ALLCHANNELS,
     };
     HAL_ADC_ConfigChannel(&hadc1, &channel0InitStruct);
     HAL_ADC_ConfigChannel(&hadc1, &channel1InitStruct);
+    HAL_ADC_ConfigChannel(&hadc1, &channel2InitStruct);
 
     HAL_ADCEx_Calibration_Start(&hadc1);
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcBuffer, ADC_CHANNELS);
@@ -140,14 +151,27 @@ void MX_ADC_Init(void) {
 
 void MX_SPI_Init(void) {
     __HAL_RCC_SPI1_CLK_ENABLE();
+    // hspi1.Instance = SPI1;
+    // hspi1.Init.Mode = SPI_MODE_MASTER;
+    // hspi1.Init.NSS = SPI_NSS_SOFT;
+    // hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128; // 562.5 kBit/s
+    // hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+    // hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
+    // hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
+    // hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+    // hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+    // hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+    // hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+    // hspi1.Init.CRCPolynomial = 7;
+
     hspi1.Instance = SPI1;
     hspi1.Init.Mode = SPI_MODE_MASTER;
-    hspi1.Init.NSS = SPI_NSS_SOFT;
-    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128; // 562.5 kBit/s
     hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-    hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
-    hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
     hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+    hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
+    hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
+    hspi1.Init.NSS = SPI_NSS_SOFT;
+    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
     hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
     hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
     hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;

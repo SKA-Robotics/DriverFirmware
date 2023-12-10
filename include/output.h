@@ -2,6 +2,7 @@
 #define OUTPUT_H
 
 #include "system.h"
+#include <stdio.h>
 
 int _write(int file, char* data, int len);
 
