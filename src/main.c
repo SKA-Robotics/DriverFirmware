@@ -1,72 +1,92 @@
 #include "motor.h"
 #include "output.h"
+#include "pid.h"
 #include "system.h"
 
-struct pid_controller {
-    float Kp;
-    float Ki;
-    float Kd;
-    float d_d;
-    float prevE;
-    float prevUd;
-    float prevUi;
+motor_t motor1 = {
+    .pwmChannelForward = &TIM1->CCR1,
+    .pwmChannelReverse = &TIM1->CCR2,
+    .adcChannel = ADC_CHANNEL_0,
+    .encoderCsPort = GPIOA,
+    .encoderCsPin = GPIO_PIN_15,
+    .state = {0}, // Default initial state
 };
 
-typedef struct pid_controller pid_controller_t;
-
-float StepPid(pid_controller_t* pid, float e) {
-    float u_d = (1 - pid->d_d) * (e - pid->prevE) + pid->d_d * pid->prevUd;
-    float u_i = e + pid->prevUi;
-    float u = pid->Kp * e + pid->Ki * u_i + pid->Kd * u_d;
-    pid->prevE = e;
-    pid->prevUd = u_d;
-    pid->prevUi = u_i;
-    return u;
-}
+motor_t motor2 = {
+    .pwmChannelForward = &TIM1->CCR3,
+    .pwmChannelReverse = &TIM1->CCR4,
+    .adcChannel = ADC_CHANNEL_1,
+    .encoderCsPort = GPIOA,      // TODO: Configure encoder pin
+    .encoderCsPin = GPIO_PIN_15, // TOFO: Configure encoder pin
+    .state = {0},                // Default initial state
+};
 
 pid_controller_t positionPid = {0};
 pid_controller_t velocityPid = {0};
 pid_controller_t currentPid = {0};
 
+int count = 12;
+int counter = 0;
+
+float setpoint = 0.0f;
+float velocity_error = 0.0f;
+// float filter_constant = 0.8f;
+
 void ControlLoop() {
     UpdateMotorState(&motor1);
     int potentiometer = readAdc(ADC_CHANNEL_2);
-    float position_setpoint = (potentiometer - 2048) / 204.0f;
+    setpoint = 0.9f * setpoint + 0.1f * (potentiometer - 2048) / 54.0f;
+    float position_setpoint = setpoint;
 
     float velocity_setpoint =
         StepPid(&positionPid, position_setpoint - motor1.state.position);
 
-    float current_setpoint =
+    float duty =
         StepPid(&velocityPid, velocity_setpoint - motor1.state.velocity);
 
-    float duty = StepPid(&currentPid, current_setpoint - motor1.state.current);
+    // Pętla prądowa na ten moment zupełnie nie działa
+    // float duty = StepPid(&currentPid, current_setpoint -
+    // motor1.state.current);
 
-    printf("Setpoint:%0.2f,\t", position_setpoint);
-    printf("Duty:%.2f,\t", duty);
-    printf("Current:%.3f,\t", motor1.state.current);
-    printf("Position:%.3f,\t", motor1.state.position);
-    printf("Velocity:%.3f,\t", motor1.state.velocity);
-    printf("\n");
+    if (++counter == count) {
+
+        counter = 0;
+
+        printf("PositionSetpoint:%0.2f,\t", position_setpoint);
+        printf("VelocitySetpoint:%0.2f,\t", velocity_setpoint);
+        printf("Position:%.3f,\t", motor1.state.position);
+        printf("Velocity:%.3f,\t", motor1.state.velocity);
+        printf("Duty:%.2f,\t", duty);
+        printf("\n");
+    }
 
     SetMotorDuty(&motor1, duty);
 }
 
 int main() {
 
-    positionPid.Kp = 1.0f;
-    positionPid.Ki = 0.0f;
-    positionPid.Kd = 0.0f;
-    positionPid.d_d = 0.0f;
+    positionPid.Kp = 3.0f;
+    positionPid.Ki = 0.001f;
+    positionPid.Kd = 0.04f;
+    positionPid.d_d = 0.6f;
+    positionPid.deadzone = 1.0f;
+    positionPid.u_max = 21.37f;
+    positionPid.du_max = 0.5f;
 
-    velocityPid.Kp = 0.1f;
-    velocityPid.Ki = 0.0f;
-    velocityPid.Kd = 0.0f;
-    velocityPid.d_d = 0.0f;
+    velocityPid.Kp = 0.05f;
+    velocityPid.Ki = 0.001f;
+    velocityPid.Kd = 0.05f;
+    velocityPid.d_d = 0.6f;
+    velocityPid.deadzone = 0.5f;
+    velocityPid.u_max = 1.0f;
+    velocityPid.du_max = 0.1f;
 
-    currentPid.Kp = 1.0f;
-    currentPid.Ki = 0.0f;
-    currentPid.Kd = 0.0f;
-    currentPid.d_d = 0.0f;
+    // currentPid.Kp = 2.0f;
+    // currentPid.Ki = 0.0f;
+    // currentPid.Kd = 0.0f;
+    // currentPid.d_d = 0.0f;
+    // positionPid.u_max = 1.0f;
+    // positionPid.du_max = 0.2f;
 
     HAL_Init();
     SystemClock_Config();

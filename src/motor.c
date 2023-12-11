@@ -2,24 +2,6 @@
 #include "mag_alpha_driver.h"
 #include <math.h>
 
-motor_t motor1 = {
-    .pwmChannelForward = &TIM1->CCR1,
-    .pwmChannelReverse = &TIM1->CCR2,
-    .adcChannel = ADC_CHANNEL_0,
-    .encoderCsPort = GPIOA,
-    .encoderCsPin = GPIO_PIN_15,
-    .state = {0}, // Default initial state
-};
-
-motor_t motor2 = {
-    .pwmChannelForward = &TIM1->CCR3,
-    .pwmChannelReverse = &TIM1->CCR4,
-    .adcChannel = ADC_CHANNEL_1,
-    .encoderCsPort = GPIOA,      // TODO: Configure encoder pin
-    .encoderCsPin = GPIO_PIN_15, // TOFO: Configure encoder pin
-    .state = {0},                // Default initial state
-};
-
 void SetMotorDuty(motor_t* motor, float duty) {
     uint32_t pwm = fabs(duty) * 1023;
     if (pwm > MAX_PWM) {

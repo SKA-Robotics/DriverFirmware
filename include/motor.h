@@ -10,7 +10,7 @@
 
 #define ENCODER_RESOLUTION 65535
 #define ENCODER_REVOLUTION_THRESHOLD 32137
-#define DELTA_TIME 0.01f
+#define DELTA_TIME 0.005f
 
 typedef struct motor motor_t;
 typedef struct motor_state motor_state_t;
@@ -32,9 +32,6 @@ struct motor {
     uint16_t encoderCsPin;
     motor_state_t state;
 };
-
-motor_t motor1;
-motor_t motor2;
 
 void SetMotorDuty(motor_t* motor, float duty);
 void UpdateMotorState(motor_t* motor);
