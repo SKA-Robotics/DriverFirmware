@@ -65,19 +65,21 @@ void ControlLoop() {
 
 int main() {
 
-    positionPid.Kp = 3.0f;
-    positionPid.Ki = 0.001f;
-    positionPid.Kd = 0.04f;
+    positionPid.Kp = 2.0f;
+    positionPid.Ki = 1.0f;
+    positionPid.Kd = 0.0f;
+    positionPid.Kaw = 0.7f;
     positionPid.d_d = 0.6f;
-    positionPid.deadzone = 1.0f;
+    positionPid.deadzone = 0.0f;
     positionPid.u_max = 21.37f;
-    positionPid.du_max = 0.5f;
+    positionPid.du_max = 1.0f;
 
-    velocityPid.Kp = 0.05f;
-    velocityPid.Ki = 0.001f;
-    velocityPid.Kd = 0.05f;
+    velocityPid.Kp = 0.2f;
+    velocityPid.Ki = 0.6f;
+    velocityPid.Kd = 0.0f;
+    velocityPid.Kaw = 0.7f;
     velocityPid.d_d = 0.6f;
-    velocityPid.deadzone = 0.5f;
+    velocityPid.deadzone = 0.0f;
     velocityPid.u_max = 1.0f;
     velocityPid.du_max = 0.1f;
 

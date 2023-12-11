@@ -7,6 +7,7 @@ struct pid_controller {
     float Kp;
     float Ki;
     float Kd;
+    float Kaw;
     float d_d;
     float deadzone;
     float u_max;
@@ -15,6 +16,7 @@ struct pid_controller {
     float prevUd;
     float prevUi;
     float prevU;
+    float antiwindup_correction;
 };
 
 float StepPid(pid_controller_t* pid, float e);

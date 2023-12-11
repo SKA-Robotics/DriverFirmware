@@ -5,6 +5,7 @@
 
 #define ADC_CHANNELS 3
 #define MAX_PWM 1023
+#define DELTA_TIME 0.005f
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;

@@ -10,7 +10,6 @@
 
 #define ENCODER_RESOLUTION 65535
 #define ENCODER_REVOLUTION_THRESHOLD 32137
-#define DELTA_TIME 0.005f
 
 typedef struct motor motor_t;
 typedef struct motor_state motor_state_t;
@@ -22,6 +21,7 @@ struct motor_state {
     float position;
     float velocity;
     float current;
+    float prevVelocity;
 };
 
 struct motor {

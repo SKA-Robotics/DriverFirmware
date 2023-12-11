@@ -1,5 +1,6 @@
 #include "pid.h"
 #include "output.h"
+#include "system.h"
 #include <math.h>
 
 float StepPid(pid_controller_t* pid, float e) {
@@ -7,29 +8,30 @@ float StepPid(pid_controller_t* pid, float e) {
         e = 0.0f;
     }
 
-    float u_d = (1 - pid->d_d) * (e - pid->prevE) + pid->d_d * pid->prevUd;
-    float u_i = e + pid->prevUi;
-    float u = pid->Kp * e + pid->Ki * u_i + pid->Kd * u_d;
+    float u_d =
+        (1 - pid->d_d) * (e - pid->prevE) / DELTA_TIME + pid->d_d * pid->prevUd;
+    float u_i =
+        e * DELTA_TIME + pid->prevUi + pid->Kaw * pid->antiwindup_correction;
+    float u_raw = pid->Kp * e + pid->Ki * u_i + pid->Kd * u_d;
 
     // Clamp U signal increment
-    float du = u - pid->prevU;
+    float du = u_raw - pid->prevU;
     if (du > pid->du_max) {
         du = pid->du_max;
     } else if (du < -pid->du_max) {
         du = -pid->du_max;
     }
 
-    u = pid->prevU + du;
+    float u = pid->prevU + du;
 
     // Clamp U signal
     if (u > pid->u_max) {
-        // printf("\tClamping top\t");
-
         u = pid->u_max;
     } else if (u < -pid->u_max) {
-        // printf("\tClamping bottom\t");
         u = -pid->u_max;
     }
+
+    pid->antiwindup_correction = u - u_raw;
 
     pid->prevE = e;
     pid->prevU = u;
