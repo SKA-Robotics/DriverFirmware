@@ -39,12 +39,10 @@ void UpdateMotorState(motor_t* motor) {
         motor->state.positionRaw * 2 * PI / ENCODER_RESOLUTION;
 
     motor->state.velocity =
-        0.05f * (deltaPositionRaw * 2 * PI / ENCODER_RESOLUTION / DELTA_TIME) +
-        0.95f * motor->state.prevVelocity;
-    motor->state.prevVelocity = motor->state.velocity;
+        deltaPositionRaw * 2 * PI / ENCODER_RESOLUTION / DELTA_TIME;
 
     uint16_t adc_value = readAdc(motor->adcChannel);
-    float scaled_adc_value = (float)adc_value * 0.0015f;
+    float scaled_adc_value = CURRENT_MULT * ((float)adc_value) - CURRENT_OFFSET;
     motor->state.current = (motor->state.direction == FORWARD)
                                ? scaled_adc_value
                                : -scaled_adc_value;

@@ -17,7 +17,7 @@ motor_t motor2 = {
     .pwmChannelReverse = &TIM1->CCR4,
     .adcChannel = ADC_CHANNEL_1,
     .encoderCsPort = GPIOA,      // TODO: Configure encoder pin
-    .encoderCsPin = GPIO_PIN_15, // TOFO: Configure encoder pin
+    .encoderCsPin = GPIO_PIN_15, // TODO: Configure encoder pin
     .state = {0},                // Default initial state
 };
 
@@ -28,35 +28,26 @@ pid_controller_t currentPid = {0};
 int count = 12;
 int counter = 0;
 
-float setpoint = 0.0f;
-float velocity_error = 0.0f;
-// float filter_constant = 0.8f;
-
 void ControlLoop() {
     UpdateMotorState(&motor1);
     int potentiometer = readAdc(ADC_CHANNEL_2);
-    setpoint = 0.9f * setpoint + 0.1f * (potentiometer - 2048) / 54.0f;
-    float position_setpoint = setpoint;
+    float setpoint = 0.9f * setpoint + 0.1f * (potentiometer - 2048) / 2048.0f;
+    float position_setpoint = 10.0f * setpoint;
 
     float velocity_setpoint =
         StepPid(&positionPid, position_setpoint - motor1.state.position);
 
-    float duty =
+    float current_setpoint =
         StepPid(&velocityPid, velocity_setpoint - motor1.state.velocity);
 
-    // Pętla prądowa na ten moment zupełnie nie działa
-    // float duty = StepPid(&currentPid, current_setpoint -
-    // motor1.state.current);
+    float duty = StepPid(&currentPid, current_setpoint - motor1.state.current);
 
     if (++counter == count) {
-
         counter = 0;
-
         printf("PositionSetpoint:%0.2f,\t", position_setpoint);
-        printf("VelocitySetpoint:%0.2f,\t", velocity_setpoint);
         printf("Position:%.3f,\t", motor1.state.position);
         printf("Velocity:%.3f,\t", motor1.state.velocity);
-        printf("Duty:%.2f,\t", duty);
+        printf("Duty:%.5f,\t", duty);
         printf("\n");
     }
 
@@ -65,17 +56,17 @@ void ControlLoop() {
 
 int main() {
 
-    positionPid.Kp = 2.0f;
+    positionPid.Kp = 3.0f;
     positionPid.Ki = 1.0f;
-    positionPid.Kd = 0.0f;
+    positionPid.Kd = 0.1f;
     positionPid.Kaw = 0.7f;
     positionPid.d_d = 0.6f;
     positionPid.deadzone = 0.0f;
     positionPid.u_max = 21.37f;
     positionPid.du_max = 1.0f;
 
-    velocityPid.Kp = 0.2f;
-    velocityPid.Ki = 0.6f;
+    velocityPid.Kp = 1.0f;
+    velocityPid.Ki = 0.0f;
     velocityPid.Kd = 0.0f;
     velocityPid.Kaw = 0.7f;
     velocityPid.d_d = 0.6f;
@@ -83,12 +74,14 @@ int main() {
     velocityPid.u_max = 1.0f;
     velocityPid.du_max = 0.1f;
 
-    // currentPid.Kp = 2.0f;
-    // currentPid.Ki = 0.0f;
-    // currentPid.Kd = 0.0f;
-    // currentPid.d_d = 0.0f;
-    // positionPid.u_max = 1.0f;
-    // positionPid.du_max = 0.2f;
+    currentPid.Kp = 1.0f;
+    currentPid.Ki = 0.0f;
+    currentPid.Kd = 0.0f;
+    currentPid.Kaw = 0.7f;
+    currentPid.d_d = 0.7f;
+    currentPid.deadzone = 0.0f;
+    currentPid.u_max = 1.0f;
+    currentPid.du_max = 0.2f;
 
     HAL_Init();
     SystemClock_Config();
