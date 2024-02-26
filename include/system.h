@@ -13,6 +13,7 @@ DMA_HandleTypeDef hdma1;
 ADC_HandleTypeDef hadc1;
 SPI_HandleTypeDef hspi1;
 UART_HandleTypeDef huart2;
+CAN_HandleTypeDef hcan;
 
 void SystemClock_Config(void);
 void MX_GPIO_Init(void);
@@ -21,6 +22,7 @@ void MX_TIM2_Init(void);
 void MX_ADC_Init(void);
 void MX_SPI_Init(void);
 void MX_USART2_UART_Init(void);
+void MX_CAN_Init(void);
 
 volatile static uint16_t adcBuffer[ADC_CHANNELS];
 

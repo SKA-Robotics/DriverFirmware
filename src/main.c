@@ -42,6 +42,8 @@ void ControlLoop() {
 
     float duty = StepPid(&currentPid, current_setpoint - motor1.state.current);
 
+    SetMotorDuty(&motor1, duty);
+
     if (++counter == count) {
         counter = 0;
         printf("PositionSetpoint:%0.2f,\t", position_setpoint);
@@ -50,8 +52,6 @@ void ControlLoop() {
         printf("Duty:%.5f,\t", duty);
         printf("\n");
     }
-
-    SetMotorDuty(&motor1, duty);
 }
 
 int main() {
@@ -91,6 +91,7 @@ int main() {
     MX_ADC_Init();
     MX_SPI_Init();
     MX_USART2_UART_Init();
+    MX_CAN_Init();
 
     HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 2, 0);
     HAL_NVIC_SetPriority(TIM2_IRQn, 1, 0);

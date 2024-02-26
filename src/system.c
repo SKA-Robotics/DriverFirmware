@@ -49,7 +49,20 @@ void MX_GPIO_Init(void) {
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    AFIO->MAPR |= AFIO_MAPR_SWJ_CFG_JTAGDISABLE | AFIO_MAPR_SPI1_REMAP;
+    GPIO_InitStruct.Pin = GPIO_PIN_8; // CAN: Rx
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_INPUT;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = GPIO_PIN_9; // CAN: Tx
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    // Remap alternate functions
+    __HAL_AFIO_REMAP_SWJ_NOJTAG();
+    __HAL_AFIO_REMAP_SPI1_ENABLE();
+    __HAL_AFIO_REMAP_CAN1_2();
 
     GPIO_InitStruct.Pin = GPIO_PIN_15; // SPI: CS3 (Encoder)
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -151,18 +164,6 @@ void MX_ADC_Init(void) {
 
 void MX_SPI_Init(void) {
     __HAL_RCC_SPI1_CLK_ENABLE();
-    // hspi1.Instance = SPI1;
-    // hspi1.Init.Mode = SPI_MODE_MASTER;
-    // hspi1.Init.NSS = SPI_NSS_SOFT;
-    // hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128; // 562.5 kBit/s
-    // hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-    // hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
-    // hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
-    // hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-    // hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
-    // hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
-    // hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-    // hspi1.Init.CRCPolynomial = 7;
 
     hspi1.Instance = SPI1;
     hspi1.Init.Mode = SPI_MODE_MASTER;
@@ -190,6 +191,42 @@ void MX_USART2_UART_Init(void) {
     huart2.Init.Mode = UART_MODE_TX_RX;
     huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     HAL_UART_Init(&huart2);
+}
+
+void MX_CAN_Init(void) {
+    __HAL_RCC_CAN1_CLK_ENABLE();
+    hcan.Instance = CAN1;
+    hcan.Init.Mode = CAN_MODE_NORMAL;
+    // I am not sure the following configuration is correct. It has to be
+    // tested. I'm trying to configure the can peripheral for 500kbps baudrate.
+    // The CAN controller is clocked at 18 MHz with prescaler 2
+    // (18,000,000 Hz / 2) / 500,000 Hz = 18 time quanta
+    // One time quant is used for start bit, the rest
+    // is distributed among BS1 and BS2.
+    hcan.Init.Prescaler = 2;
+    hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
+    hcan.Init.TimeSeg1 = CAN_BS1_9TQ;
+    hcan.Init.TimeSeg2 = CAN_BS2_8TQ;
+    hcan.Init.TimeTriggeredMode = DISABLE;
+    hcan.Init.AutoBusOff = ENABLE;
+    hcan.Init.AutoWakeUp = DISABLE;
+    hcan.Init.AutoRetransmission = ENABLE;
+    hcan.Init.ReceiveFifoLocked = DISABLE;
+    hcan.Init.TransmitFifoPriority = DISABLE;
+    HAL_StatusTypeDef result = HAL_CAN_Init(&hcan);
+    printf("Initializing can...\n");
+    if (result == HAL_OK) {
+        printf("Can initialized\n");
+    } else {
+        printf("Error");
+    }
+    printf("Starting can...\n");
+    result = HAL_CAN_Start(&hcan);
+    if (result == HAL_OK) {
+        printf("Can started\n");
+    } else {
+        printf("Error");
+    }
 }
 
 uint16_t readAdc(uint32_t channel) { return adcBuffer[channel]; }
