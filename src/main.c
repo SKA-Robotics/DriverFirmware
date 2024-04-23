@@ -25,8 +25,8 @@
 // pid_controller_t velocityPid = {0};
 // pid_controller_t currentPid = {0};
 
-// int count = 12;
-// int counter = 0;
+int count = 12;
+int counter = 0;
 
 void ControlLoop() {
     // UpdateMotorState(&motor1);
@@ -45,14 +45,15 @@ void ControlLoop() {
 
     // SetMotorDuty(&motor1, duty);
 
-    // if (++counter == count) {
-    // counter = 0;
-    // printf("PositionSetpoint:%0.2f,\t", position_setpoint);
-    // printf("Position:%.3f,\t", motor1.state.position);
-    // printf("Velocity:%.3f,\t", motor1.state.velocity);
-    // printf("Duty:%.5f,\t", duty);
-    // printf("\n");
-    // }
+    if (++counter == count) {
+        counter = 0;
+        // printf("PositionSetpoint:%0.2f,\t", position_setpoint);
+        // printf("Position:%.3f,\t", motor1.state.position);
+        // printf("Velocity:%.3f,\t", motor1.state.velocity);
+        // printf("Duty:%.5f,\t", duty);
+        // printf("\n");
+        printf("ADC0:%d,ADC1:%d,ADC2:%d\n", readAdc(0), readAdc(1), readAdc(2));
+    }
 }
 
 int main() {
@@ -106,7 +107,6 @@ int main() {
                       GPIO_PIN_RESET);
     while (1) {
         HAL_Delay(1000);
-        printf("ADC1: %d\tADC2: %d\n", readAdc(0), readAdc(1));
         HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4);
     }
 }

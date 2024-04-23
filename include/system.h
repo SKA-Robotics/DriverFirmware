@@ -9,10 +9,8 @@
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
-DMA_HandleTypeDef hdma1;
-DMA_HandleTypeDef hdma2;
 ADC_HandleTypeDef hadc1;
-ADC_HandleTypeDef hadc2;
+DMA_HandleTypeDef hdma1;
 SPI_HandleTypeDef hspi1;
 UART_HandleTypeDef huart;
 CAN_HandleTypeDef hcan;
@@ -26,7 +24,9 @@ void MX_SPI_Init(void);
 void MX_USART3_UART_Init(void);
 void MX_CAN_Init(void);
 
-volatile static uint32_t adcBuffer[2];
+#define ADC_CHANNELS 3
+
+volatile static uint16_t adcBuffer[ADC_CHANNELS];
 
 uint16_t readAdc(uint32_t channel);
 

@@ -56,7 +56,7 @@ void MX_GPIO_Init(void) {
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
     // ADC
-    GPIO_InitStruct.Pin = GPIO_PIN_1;
+    GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
     GPIO_InitStruct.Pin = GPIO_PIN_5;
@@ -148,74 +148,47 @@ void MX_PWM_Init(void) {
 
 void MX_ADC_Init(void) {
     __HAL_RCC_DMA1_CLK_ENABLE();
-    __HAL_RCC_ADC1_CLK_ENABLE();
-    __HAL_RCC_ADC2_CLK_ENABLE();
-
     hdma1.Instance = DMA1_Channel1;
     hdma1.Init.Direction = DMA_PERIPH_TO_MEMORY;
     hdma1.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma1.Init.MemInc = DMA_MINC_DISABLE;
+    hdma1.Init.MemInc = DMA_MINC_ENABLE;
     hdma1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
     hdma1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
     hdma1.Init.Mode = DMA_CIRCULAR;
     hdma1.Init.Priority = DMA_PRIORITY_HIGH;
-
-    hdma2.Instance = DMA1_Channel2;
-    hdma2.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    hdma2.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma2.Init.MemInc = DMA_MINC_DISABLE;
-    hdma2.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-    hdma2.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-    hdma2.Init.Mode = DMA_CIRCULAR;
-    hdma2.Init.Priority = DMA_PRIORITY_HIGH;
-
     HAL_DMA_Init(&hdma1);
-    HAL_DMA_Init(&hdma2);
     __HAL_LINKDMA(&hadc1, DMA_Handle, hdma1);
-    __HAL_LINKDMA(&hadc2, DMA_Handle, hdma2);
 
+    __HAL_RCC_ADC1_CLK_ENABLE();
     RCC_PeriphCLKInitTypeDef adcClk_InitStruct = {
         .PeriphClockSelection = RCC_PERIPHCLK_ADC,
         .AdcClockSelection = RCC_ADCPCLK2_DIV4,
     };
-    HAL_RCCEx_PeriphCLKConfig(&adcClk_InitStruct);
-
     hadc1.Instance = ADC1;
     hadc1.Init.ContinuousConvMode = ENABLE;
     hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
     hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-    hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
-    hadc1.Init.NbrOfConversion = 1;
+    hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
+    hadc1.Init.NbrOfConversion = ADC_CHANNELS;
     hadc1.Init.DiscontinuousConvMode = DISABLE;
     hadc1.Init.NbrOfDiscConversion = 1;
+    HAL_RCCEx_PeriphCLKConfig(&adcClk_InitStruct);
     HAL_ADC_Init(&hadc1);
-    ADC_ChannelConfTypeDef channelInitStruct = {
-        .Channel = ADC_CHANNEL_15,
-        .Rank = ADC_REGULAR_RANK_1,
-        .SamplingTime = ADC_SAMPLETIME_28CYCLES_5,
-    };
+
+    ADC_ChannelConfTypeDef channelInitStruct = {0};
+    channelInitStruct.SamplingTime = ADC_SAMPLETIME_28CYCLES5_SMPR1ALLCHANNELS;
+    channelInitStruct.Channel = ADC_CHANNEL_8;
+    channelInitStruct.Rank = ADC_REGULAR_RANK_1;
+    HAL_ADC_ConfigChannel(&hadc1, &channelInitStruct);
+    channelInitStruct.Channel = ADC_CHANNEL_15;
+    channelInitStruct.Rank = ADC_REGULAR_RANK_2;
+    HAL_ADC_ConfigChannel(&hadc1, &channelInitStruct);
+    channelInitStruct.Channel = ADC_CHANNEL_9;
+    channelInitStruct.Rank = ADC_REGULAR_RANK_3;
     HAL_ADC_ConfigChannel(&hadc1, &channelInitStruct);
 
-    hadc2.Instance = ADC2;
-    hadc2.Init.ContinuousConvMode = ENABLE;
-    hadc2.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-    hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-    hadc2.Init.ScanConvMode = ADC_SCAN_DISABLE;
-    hadc2.Init.NbrOfConversion = 1;
-    hadc2.Init.DiscontinuousConvMode = DISABLE;
-    hadc2.Init.NbrOfDiscConversion = 1;
-    HAL_ADC_Init(&hadc2);
-    ADC_ChannelConfTypeDef channelInitStruct2 = {
-        .Channel = ADC_CHANNEL_9,
-        .Rank = ADC_REGULAR_RANK_1,
-        .SamplingTime = ADC_SAMPLETIME_28CYCLES_5,
-    };
-    HAL_ADC_ConfigChannel(&hadc2, &channelInitStruct2);
-
     HAL_ADCEx_Calibration_Start(&hadc1);
-    HAL_ADCEx_Calibration_Start(&hadc2);
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcBuffer, 1);
-    HAL_ADC_Start_DMA(&hadc2, (uint32_t*)adcBuffer + 1, 1);
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcBuffer, ADC_CHANNELS);
 }
 
 void MX_SPI_Init(void) {
