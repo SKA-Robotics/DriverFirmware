@@ -1,6 +1,7 @@
 // #include "motor.h"
 #include "output.h"
 // #include "pid.h"
+#include "mag_alpha_driver.h"
 #include "system.h"
 
 // motor_t motor1 = {
@@ -28,6 +29,21 @@
 int count = 12;
 int counter = 0;
 
+// uint8_t DRV8873_ReadRegister(uint8_t reg_addr) {
+//     uint8_t tx_data[2] = {reg_addr << 1 | 0b01000000, 0};
+//     uint8_t rx_data[2] = {0};
+
+//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15,
+//                       GPIO_PIN_RESET); // Select the SPI device
+
+//     HAL_SPI_TransmitReceive(&hspi1, tx_data, rx_data, 2, HAL_MAX_DELAY);
+
+//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15,
+//                       GPIO_PIN_SET); // Deselect the SPI device
+
+//     return rx_data[1]; // Return the received data
+// }
+
 void ControlLoop() {
     // UpdateMotorState(&motor1);
     // int potentiometer = readAdc(ADC_CHANNEL_2);
@@ -52,7 +68,9 @@ void ControlLoop() {
         // printf("Velocity:%.3f,\t", motor1.state.velocity);
         // printf("Duty:%.5f,\t", duty);
         // printf("\n");
-        printf("ADC0:%d,ADC1:%d,ADC2:%d\n", readAdc(0), readAdc(1), readAdc(2));
+        uint16_t angle = readMagAlphaAngle(GPIOA, GPIO_PIN_3);
+        printf("angle:%d,ADC0:%d,ADC1:%d,ADC2:%d\n", angle, readAdc(0),
+               readAdc(1), readAdc(2));
     }
 }
 
@@ -100,9 +118,9 @@ int main() {
     HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 
     TIM1->CCR1 = 0;
-    TIM1->CCR2 = 1000;
+    TIM1->CCR2 = 500;
     TIM3->CCR1 = 0;
-    TIM3->CCR2 = 1000;
+    TIM3->CCR2 = 500;
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7,
                       GPIO_PIN_RESET);
     while (1) {

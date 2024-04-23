@@ -63,15 +63,28 @@ void MX_GPIO_Init(void) {
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-    // GPIO_InitStruct.Pin = GPIO_PIN_3 | GPIO_PIN_5; // SPI: SCK, MOSI
-    // GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    // GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    // HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    // SPI
+    GPIO_InitStruct.Pin = GPIO_PIN_5 | GPIO_PIN_7; // SPI: SCK, MOSI
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    // GPIO_InitStruct.Pin = GPIO_PIN_4; // SPI: MISO
-    // GPIO_InitStruct.Mode = GPIO_MODE_AF_INPUT;
-    // GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    // HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = GPIO_PIN_6; // SPI: MISO
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    // Chip select pins
+    GPIO_InitStruct.Pin = GPIO_PIN_12 | GPIO_PIN_13;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12 | GPIO_PIN_13, GPIO_PIN_SET);
+    GPIO_InitStruct.Pin = GPIO_PIN_3 | GPIO_PIN_15;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3 | GPIO_PIN_15, GPIO_PIN_SET);
 
     // GPIO_InitStruct.Pin = GPIO_PIN_8; // CAN: Rx
     // GPIO_InitStruct.Mode = GPIO_MODE_AF_INPUT;
@@ -88,14 +101,7 @@ void MX_GPIO_Init(void) {
     __HAL_AFIO_REMAP_TIM1_PARTIAL();
     __HAL_AFIO_REMAP_TIM3_ENABLE();
     __HAL_AFIO_REMAP_USART3_DISABLE();
-    // __HAL_AFIO_REMAP_SPI1_ENABLE();
     // __HAL_AFIO_REMAP_CAN1_2();
-
-    // GPIO_InitStruct.Pin = GPIO_PIN_15; // SPI: CS3 (Encoder)
-    // GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    // GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    // HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-    // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
 }
 
 void MX_TIM2_Init(void) {
@@ -193,7 +199,6 @@ void MX_ADC_Init(void) {
 
 void MX_SPI_Init(void) {
     __HAL_RCC_SPI1_CLK_ENABLE();
-
     hspi1.Instance = SPI1;
     hspi1.Init.Mode = SPI_MODE_MASTER;
     hspi1.Init.Direction = SPI_DIRECTION_2LINES;
