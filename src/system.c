@@ -23,52 +23,79 @@ void SystemClock_Config(void) {
 void MX_GPIO_Init(void) {
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_AFIO_CLK_ENABLE();
 
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-    GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_3 // UART
-                          | GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 |
-                          GPIO_PIN_11; // PWM Output
+    // USART
+    GPIO_InitStruct.Pin = GPIO_PIN_10;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM,
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_4; // ADC
-    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_3 | GPIO_PIN_5; // SPI: SCK, MOSI
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH,
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = GPIO_PIN_11;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = GPIO_PIN_4; // SPI: MISO
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_INPUT;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_8; // CAN: Rx
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_INPUT;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_9; // CAN: Tx
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-    // Remap alternate functions
-    __HAL_AFIO_REMAP_SWJ_NOJTAG();
-    __HAL_AFIO_REMAP_SPI1_ENABLE();
-    __HAL_AFIO_REMAP_CAN1_2();
-
-    GPIO_InitStruct.Pin = GPIO_PIN_15; // SPI: CS3 (Encoder)
+    // LEDs
+    GPIO_InitStruct.Pin = GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW,
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    // PWM
+    GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH,
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
+
+    GPIO_InitStruct.Pin = GPIO_PIN_6 | GPIO_PIN_7;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH,
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+    // ADC
+    GPIO_InitStruct.Pin = GPIO_PIN_1;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = GPIO_PIN_5;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+    // GPIO_InitStruct.Pin = GPIO_PIN_3 | GPIO_PIN_5; // SPI: SCK, MOSI
+    // GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    // GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    // HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    // GPIO_InitStruct.Pin = GPIO_PIN_4; // SPI: MISO
+    // GPIO_InitStruct.Mode = GPIO_MODE_AF_INPUT;
+    // GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    // HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    // GPIO_InitStruct.Pin = GPIO_PIN_8; // CAN: Rx
+    // GPIO_InitStruct.Mode = GPIO_MODE_AF_INPUT;
+    // GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    // HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    // GPIO_InitStruct.Pin = GPIO_PIN_9; // CAN: Tx
+    // GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    // GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    // HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    // // Remap alternate functions
+    __HAL_AFIO_REMAP_SWJ_NOJTAG();
+    __HAL_AFIO_REMAP_TIM1_PARTIAL();
+    __HAL_AFIO_REMAP_TIM3_ENABLE();
+    __HAL_AFIO_REMAP_USART3_DISABLE();
+    // __HAL_AFIO_REMAP_SPI1_ENABLE();
+    // __HAL_AFIO_REMAP_CAN1_2();
+
+    // GPIO_InitStruct.Pin = GPIO_PIN_15; // SPI: CS3 (Encoder)
+    // GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    // GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    // HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
 }
 
 void MX_TIM2_Init(void) {
@@ -91,7 +118,7 @@ void MX_PWM_Init(void) {
     htim1.Init.Prescaler = 1;
     htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 
     TIM_OC_InitTypeDef OC_InitStruct = {
         .OCMode = TIM_OCMODE_PWM1,
@@ -102,64 +129,93 @@ void MX_PWM_Init(void) {
     HAL_TIM_PWM_Init(&htim1);
     HAL_TIM_PWM_ConfigChannel(&htim1, &OC_InitStruct, TIM_CHANNEL_1);
     HAL_TIM_PWM_ConfigChannel(&htim1, &OC_InitStruct, TIM_CHANNEL_2);
-    HAL_TIM_PWM_ConfigChannel(&htim1, &OC_InitStruct, TIM_CHANNEL_3);
-    HAL_TIM_PWM_ConfigChannel(&htim1, &OC_InitStruct, TIM_CHANNEL_4);
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
+
+    __HAL_RCC_TIM3_CLK_ENABLE();
+    htim3.Instance = TIM3;
+    htim3.Init.Period = MAX_PWM;
+    htim3.Init.Prescaler = 1;
+    htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    HAL_TIM_PWM_Init(&htim3);
+    HAL_TIM_PWM_ConfigChannel(&htim3, &OC_InitStruct, TIM_CHANNEL_1);
+    HAL_TIM_PWM_ConfigChannel(&htim3, &OC_InitStruct, TIM_CHANNEL_2);
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 }
 
 void MX_ADC_Init(void) {
     __HAL_RCC_DMA1_CLK_ENABLE();
+    __HAL_RCC_ADC1_CLK_ENABLE();
+    __HAL_RCC_ADC2_CLK_ENABLE();
+
     hdma1.Instance = DMA1_Channel1;
     hdma1.Init.Direction = DMA_PERIPH_TO_MEMORY;
     hdma1.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma1.Init.MemInc = DMA_MINC_ENABLE;
+    hdma1.Init.MemInc = DMA_MINC_DISABLE;
     hdma1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
     hdma1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
     hdma1.Init.Mode = DMA_CIRCULAR;
     hdma1.Init.Priority = DMA_PRIORITY_HIGH;
-    HAL_DMA_Init(&hdma1);
-    __HAL_LINKDMA(&hadc1, DMA_Handle, hdma1);
 
-    __HAL_RCC_ADC1_CLK_ENABLE();
+    hdma2.Instance = DMA1_Channel2;
+    hdma2.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma2.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma2.Init.MemInc = DMA_MINC_DISABLE;
+    hdma2.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+    hdma2.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+    hdma2.Init.Mode = DMA_CIRCULAR;
+    hdma2.Init.Priority = DMA_PRIORITY_HIGH;
+
+    HAL_DMA_Init(&hdma1);
+    HAL_DMA_Init(&hdma2);
+    __HAL_LINKDMA(&hadc1, DMA_Handle, hdma1);
+    __HAL_LINKDMA(&hadc2, DMA_Handle, hdma2);
+
     RCC_PeriphCLKInitTypeDef adcClk_InitStruct = {
         .PeriphClockSelection = RCC_PERIPHCLK_ADC,
         .AdcClockSelection = RCC_ADCPCLK2_DIV4,
     };
+    HAL_RCCEx_PeriphCLKConfig(&adcClk_InitStruct);
+
     hadc1.Instance = ADC1;
     hadc1.Init.ContinuousConvMode = ENABLE;
     hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
     hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-    hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
-    hadc1.Init.NbrOfConversion = ADC_CHANNELS;
+    hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+    hadc1.Init.NbrOfConversion = 1;
     hadc1.Init.DiscontinuousConvMode = DISABLE;
     hadc1.Init.NbrOfDiscConversion = 1;
-    HAL_RCCEx_PeriphCLKConfig(&adcClk_InitStruct);
     HAL_ADC_Init(&hadc1);
-
-    ADC_ChannelConfTypeDef channel0InitStruct = {
-        .Channel = ADC_CHANNEL_0,
+    ADC_ChannelConfTypeDef channelInitStruct = {
+        .Channel = ADC_CHANNEL_15,
         .Rank = ADC_REGULAR_RANK_1,
-        .SamplingTime = ADC_SAMPLETIME_28CYCLES5_SMPR1ALLCHANNELS,
+        .SamplingTime = ADC_SAMPLETIME_28CYCLES_5,
     };
-    ADC_ChannelConfTypeDef channel1InitStruct = {
-        .Channel = ADC_CHANNEL_1,
-        .Rank = ADC_REGULAR_RANK_2,
-        .SamplingTime = ADC_SAMPLETIME_28CYCLES5_SMPR1ALLCHANNELS,
+    HAL_ADC_ConfigChannel(&hadc1, &channelInitStruct);
+
+    hadc2.Instance = ADC2;
+    hadc2.Init.ContinuousConvMode = ENABLE;
+    hadc2.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+    hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+    hadc2.Init.ScanConvMode = ADC_SCAN_DISABLE;
+    hadc2.Init.NbrOfConversion = 1;
+    hadc2.Init.DiscontinuousConvMode = DISABLE;
+    hadc2.Init.NbrOfDiscConversion = 1;
+    HAL_ADC_Init(&hadc2);
+    ADC_ChannelConfTypeDef channelInitStruct2 = {
+        .Channel = ADC_CHANNEL_9,
+        .Rank = ADC_REGULAR_RANK_1,
+        .SamplingTime = ADC_SAMPLETIME_28CYCLES_5,
     };
-    ADC_ChannelConfTypeDef channel2InitStruct = {
-        .Channel = ADC_CHANNEL_4,
-        .Rank = ADC_REGULAR_RANK_3,
-        .SamplingTime = ADC_SAMPLETIME_28CYCLES5_SMPR1ALLCHANNELS,
-    };
-    HAL_ADC_ConfigChannel(&hadc1, &channel0InitStruct);
-    HAL_ADC_ConfigChannel(&hadc1, &channel1InitStruct);
-    HAL_ADC_ConfigChannel(&hadc1, &channel2InitStruct);
+    HAL_ADC_ConfigChannel(&hadc2, &channelInitStruct2);
 
     HAL_ADCEx_Calibration_Start(&hadc1);
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcBuffer, ADC_CHANNELS);
+    HAL_ADCEx_Calibration_Start(&hadc2);
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcBuffer, 1);
+    HAL_ADC_Start_DMA(&hadc2, (uint32_t*)adcBuffer + 1, 1);
 }
 
 void MX_SPI_Init(void) {
@@ -172,7 +228,7 @@ void MX_SPI_Init(void) {
     hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
     hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
     hspi1.Init.NSS = SPI_NSS_SOFT;
-    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
+    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
     hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
     hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
     hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -181,16 +237,17 @@ void MX_SPI_Init(void) {
     __HAL_SPI_ENABLE(&hspi1);
 }
 
-void MX_USART2_UART_Init(void) {
-    __HAL_RCC_USART2_CLK_ENABLE();
-    huart2.Instance = USART2;
-    huart2.Init.BaudRate = 115200;
-    huart2.Init.WordLength = UART_WORDLENGTH_8B;
-    huart2.Init.StopBits = UART_STOPBITS_1;
-    huart2.Init.Parity = UART_PARITY_NONE;
-    huart2.Init.Mode = UART_MODE_TX_RX;
-    huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-    HAL_UART_Init(&huart2);
+void MX_USART3_UART_Init(void) {
+    __HAL_RCC_USART3_CLK_ENABLE();
+    huart.Instance = USART3;
+    huart.Init.BaudRate = 115200;
+    huart.Init.WordLength = UART_WORDLENGTH_8B;
+    huart.Init.StopBits = UART_STOPBITS_1;
+    huart.Init.Parity = UART_PARITY_NONE;
+    huart.Init.Mode = UART_MODE_TX_RX;
+    huart.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    huart.Init.OverSampling = UART_OVERSAMPLING_16;
+    HAL_UART_Init(&huart);
 }
 
 void MX_CAN_Init(void) {
