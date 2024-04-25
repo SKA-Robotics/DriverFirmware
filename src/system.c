@@ -28,63 +28,76 @@ void MX_GPIO_Init(void) {
 
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-    // USART
-    GPIO_InitStruct.Pin = GPIO_PIN_10;
+    // UART
+    GPIO_InitStruct.Pin = UART_TX_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH,
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-    GPIO_InitStruct.Pin = GPIO_PIN_11;
+    HAL_GPIO_Init(UART_PORT, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = UART_RX_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(UART_PORT, &GPIO_InitStruct);
 
     // LEDs
-    GPIO_InitStruct.Pin = GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
+    GPIO_InitStruct.Pin =
+        LED_POWER_PIN | LED_CAN_PIN | LED_ENC0_PIN | LED_ENC1_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW,
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(LED_PORT, &GPIO_InitStruct);
 
     // PWM
-    GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9;
+    GPIO_InitStruct.Pin = PWM0_CH1_PIN | PWM0_CH2_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH,
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_6 | GPIO_PIN_7;
+    HAL_GPIO_Init(PWM0_PORT, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = PWM1_CH1_PIN | PWM1_CH2_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH,
-    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+    HAL_GPIO_Init(PWM1_PORT, &GPIO_InitStruct);
 
     // ADC
-    GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1;
+    GPIO_InitStruct.Pin = THERMISTOR_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-    GPIO_InitStruct.Pin = GPIO_PIN_5;
+    HAL_GPIO_Init(THERMISTOR_PORT, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = CURRENT0_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+    HAL_GPIO_Init(CURRENT0_PORT, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = CURRENT1_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    HAL_GPIO_Init(CURRENT1_PORT, &GPIO_InitStruct);
 
     // SPI
-    GPIO_InitStruct.Pin = GPIO_PIN_5 | GPIO_PIN_7; // SPI: SCK, MOSI
+    GPIO_InitStruct.Pin = SPI_MOSI_PIN | SPI_SCK_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_Init(SPI_PORT, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = GPIO_PIN_6; // SPI: MISO
+    GPIO_InitStruct.Pin = SPI_MISO_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_Init(SPI_PORT, &GPIO_InitStruct);
 
     // Chip select pins
-    GPIO_InitStruct.Pin = GPIO_PIN_12 | GPIO_PIN_13;
+    GPIO_InitStruct.Pin = CS_ENC0_PIN | CS_DRV0_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12 | GPIO_PIN_13, GPIO_PIN_SET);
-    GPIO_InitStruct.Pin = GPIO_PIN_3 | GPIO_PIN_15;
+    HAL_GPIO_Init(CS_ENC0DRV0_PORT, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = CS_ENC1_PIN | CS_DRV1_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3 | GPIO_PIN_15, GPIO_PIN_SET);
+    HAL_GPIO_Init(CS_ENC1DRV1_PORT, &GPIO_InitStruct);
+    HAL_GPIO_WritePin(CS_ENC0DRV0_PORT, CS_ENC0_PIN | CS_DRV0_PIN,
+                      GPIO_PIN_SET);
+    HAL_GPIO_WritePin(CS_ENC1DRV1_PORT, CS_ENC1_PIN | CS_DRV1_PIN,
+                      GPIO_PIN_SET);
+
+    // Driver nFault pins
+    GPIO_InitStruct.Pin = NFAULT0_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    HAL_GPIO_Init(NFAULT0_PORT, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = NFAULT1_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    HAL_GPIO_Init(NFAULT1_PORT, &GPIO_InitStruct);
 
     // GPIO_InitStruct.Pin = GPIO_PIN_8; // CAN: Rx
     // GPIO_InitStruct.Mode = GPIO_MODE_AF_INPUT;
