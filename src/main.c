@@ -44,24 +44,10 @@ void ControlLoop() {
     // float duty = StepPid(&currentPid, current_setpoint -
     // motor0.state.current);
     float duty = -0.6f;
+    SetMotorDuty(&motor0, duty);
 
     if (++counter == count) {
         counter = 0;
-        // for (uint i = 0; i < 6; ++i) {
-        //     uint16_t r = DRV8873_ReadRegister(CS_ENC0DRV0_PORT, CS_DRV0_PIN,
-        //     i); printf("Register %d: ", i); for (int i = 15; i >= 0; i--) {
-        //         printf("%d", (r >> i) & 1);
-        //     }
-        //     printf(",\t");
-        // }
-        // printf("\n");
-        // UpdateMotorState(&motor0);
-        // SetMotorDuty(&motor0, duty);
-        // uint8_t error = MA730_CheckError(CS_ENC0DRV0_PORT, CS_ENC0_PIN);
-
-        // if (error != MA730_NoError) {
-        //     printf("Encoder error: %d", error);
-        // }
         // // printf("PositionSetpoint:%0.2f,\t", position_setpoint);
         // printf("Position:%.3f,\t", motor0.state.position);
         // printf("Velocity:%.3f,\t", motor0.state.velocity);
@@ -119,17 +105,17 @@ int main() {
 
     while (1) {
         // // DRV SPI test:
-        // for (uint8_t registerAddress = 0; registerAddress <= 5;
-        //      ++registerAddress) {
-        //     uint16_t response = DRV8873_ReadRegister(
-        //         CS_ENC0DRV0_PORT, CS_DRV0_PIN, registerAddress);
-        //     printf("R%d:", registerAddress);
-        //     for (int i = 15; i >= 0; i--) {
-        //         printf("%d", (response >> i) & 1);
-        //     }
-        //     printf(",\t");
-        // }
-        // printf("\n");
+        for (uint8_t registerAddress = 0; registerAddress <= 5;
+             ++registerAddress) {
+            uint16_t response = DRV8873_ReadRegister(
+                CS_ENC0DRV0_PORT, CS_DRV0_PIN, registerAddress);
+            printf("R%d:", registerAddress);
+            for (int i = 15; i >= 0; i--) {
+                printf("%d", (response >> i) & 1);
+            }
+            printf(",\t");
+        }
+        printf("\n");
         HAL_Delay(1000);
         HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4);
     }
