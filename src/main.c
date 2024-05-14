@@ -57,11 +57,7 @@ void ControlLoop() {
         // printf("\n");
         // UpdateMotorState(&motor0);
         // SetMotorDuty(&motor0, duty);
-        uint8_t error = MA730_CheckError(CS_ENC0DRV0_PORT, CS_ENC0_PIN);
-        for (int i = 7; i >= 0; i--) {
-            printf("%d", (error >> i) & 1);
-        }
-        printf(",\n");
+        // uint8_t error = MA730_CheckError(CS_ENC0DRV0_PORT, CS_ENC0_PIN);
 
         // if (error != MA730_NoError) {
         //     printf("Encoder error: %d", error);
@@ -134,7 +130,6 @@ int main() {
         //     printf(",\t");
         // }
         // printf("\n");
-
         HAL_Delay(1000);
         HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4);
     }

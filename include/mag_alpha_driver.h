@@ -13,6 +13,9 @@ uint16_t MA730_ReadAngle(GPIO_TypeDef* csPort, uint16_t csPin);
 uint16_t MA730_ReadRegister(GPIO_TypeDef* csPort, uint16_t csPin,
                             uint8_t registerAddress);
 
+void MA730_WriteRegister(GPIO_TypeDef* csPort, uint16_t csPin,
+                         uint8_t registerAddress, uint8_t value);
+
 uint8_t MA730_GetError(GPIO_TypeDef* csPort, uint16_t csPin, uint8_t* error);
 
 #endif // MAG_ALPHA_DRIVER
