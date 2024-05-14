@@ -6,13 +6,13 @@
 
 #define FORWARD 1
 #define REVERSE 0
-#define PI 3.14159265359f
 
 #define ENCODER_RESOLUTION 65535
 #define ENCODER_REVOLUTION_THRESHOLD 32137
 
-#define CURRENT_MULT 0.01f
-#define CURRENT_OFFSET 0.105f
+#define CURRENT_ADC_DEADZONE 3
+#define CURRENT_MULT 0.00125f
+#define CURRENT_OFFSET 0.0000f
 
 typedef struct motor motor_t;
 typedef struct motor_state motor_state_t;

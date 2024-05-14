@@ -19,8 +19,9 @@ void SetMotorDuty(motor_t* motor, float duty) {
 }
 
 void UpdateMotorState(motor_t* motor) {
+    uint8_t error = MA730_NoError;
     uint16_t positionMeasurement =
-        readMagAlphaAngle(motor->encoderCsPort, motor->encoderCsPin);
+        MA730_ReadAngle(motor->encoderCsPort, motor->encoderCsPin);
     long deltaPositionRaw =
         positionMeasurement - motor->state.prevPositionMeasurement;
     motor->state.prevPositionMeasurement = positionMeasurement;
@@ -36,13 +37,16 @@ void UpdateMotorState(motor_t* motor) {
     motor->state.positionRaw += deltaPositionRaw;
 
     motor->state.position =
-        motor->state.positionRaw * 2 * PI / ENCODER_RESOLUTION;
+        (float)motor->state.positionRaw / ENCODER_RESOLUTION;
 
     motor->state.velocity =
-        deltaPositionRaw * 2 * PI / ENCODER_RESOLUTION / DELTA_TIME;
+        (float)deltaPositionRaw / ENCODER_RESOLUTION / DELTA_TIME;
 
     uint16_t adc_value = readAdc(motor->adcChannel);
-    float scaled_adc_value = CURRENT_MULT * ((float)adc_value) - CURRENT_OFFSET;
+    if (adc_value < CURRENT_ADC_DEADZONE) {
+        adc_value = 0;
+    }
+    float scaled_adc_value = CURRENT_MULT * ((float)adc_value) + CURRENT_OFFSET;
     motor->state.current = (motor->state.direction == FORWARD)
                                ? scaled_adc_value
                                : -scaled_adc_value;

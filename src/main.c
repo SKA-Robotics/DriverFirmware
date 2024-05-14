@@ -1,26 +1,27 @@
-// #include "motor.h"
+#include "motor.h"
 #include "output.h"
 // #include "pid.h"
+#include "drv8873_driver.h"
 #include "mag_alpha_driver.h"
 #include "system.h"
 
-// motor_t motor1 = {
-//     .pwmChannelForward = &TIM1->CCR1,
-//     .pwmChannelReverse = &TIM1->CCR2,
-//     .adcChannel = ADC_CHANNEL_0,
-//     .encoderCsPort = GPIOA,
-//     .encoderCsPin = GPIO_PIN_15,
-//     .state = {0}, // Default initial state
-// };
+motor_t motor0 = {
+    .pwmChannelForward = &TIM3->CCR1,
+    .pwmChannelReverse = &TIM3->CCR2,
+    .adcChannel = ADC_MOTOR0_CURRENT,
+    .encoderCsPort = CS_ENC0DRV0_PORT,
+    .encoderCsPin = CS_ENC0_PIN,
+    .state = {0}, // Default initial state
+};
 
-// motor_t motor2 = {
-//     .pwmChannelForward = &TIM1->CCR3,
-//     .pwmChannelReverse = &TIM1->CCR4,
-//     .adcChannel = ADC_CHANNEL_1,
-//     .encoderCsPort = GPIOA,      // TODO: Configure encoder pin
-//     .encoderCsPin = GPIO_PIN_15, // TODO: Configure encoder pin
-//     .state = {0},                // Default initial state
-// };
+motor_t motor1 = {
+    .pwmChannelForward = &TIM1->CCR1,
+    .pwmChannelReverse = &TIM1->CCR2,
+    .adcChannel = ADC_MOTOR1_CURRENT,
+    .encoderCsPort = CS_ENC1DRV1_PORT,
+    .encoderCsPin = CS_ENC1_PIN,
+    .state = {0}, // Default initial state
+};
 
 // pid_controller_t positionPid = {0};
 // pid_controller_t velocityPid = {0};
@@ -29,48 +30,48 @@
 int count = 12;
 int counter = 0;
 
-// uint8_t DRV8873_ReadRegister(uint8_t reg_addr) {
-//     uint8_t tx_data[2] = {reg_addr << 1 | 0b01000000, 0};
-//     uint8_t rx_data[2] = {0};
-
-//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15,
-//                       GPIO_PIN_RESET); // Select the SPI device
-
-//     HAL_SPI_TransmitReceive(&hspi1, tx_data, rx_data, 2, HAL_MAX_DELAY);
-
-//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15,
-//                       GPIO_PIN_SET); // Deselect the SPI device
-
-//     return rx_data[1]; // Return the received data
-// }
-
 void ControlLoop() {
-    // UpdateMotorState(&motor1);
     // int potentiometer = readAdc(ADC_CHANNEL_2);
     // float setpoint = 0.9f * setpoint + 0.1f * (potentiometer - 2048) /
     // 2048.0f; float position_setpoint = 10.0f * setpoint;
 
     // float velocity_setpoint =
-    //     StepPid(&positionPid, position_setpoint - motor1.state.position);
+    //     StepPid(&positionPid, position_setpoint - motor0.state.position);
 
     // float current_setpoint =
-    //     StepPid(&velocityPid, velocity_setpoint - motor1.state.velocity);
+    //     StepPid(&velocityPid, velocity_setpoint - motor0.state.velocity);
 
     // float duty = StepPid(&currentPid, current_setpoint -
-    // motor1.state.current);
-
-    // SetMotorDuty(&motor1, duty);
+    // motor0.state.current);
+    float duty = -0.6f;
 
     if (++counter == count) {
         counter = 0;
-        // printf("PositionSetpoint:%0.2f,\t", position_setpoint);
-        // printf("Position:%.3f,\t", motor1.state.position);
-        // printf("Velocity:%.3f,\t", motor1.state.velocity);
+        // for (uint i = 0; i < 6; ++i) {
+        //     uint16_t r = DRV8873_ReadRegister(CS_ENC0DRV0_PORT, CS_DRV0_PIN,
+        //     i); printf("Register %d: ", i); for (int i = 15; i >= 0; i--) {
+        //         printf("%d", (r >> i) & 1);
+        //     }
+        //     printf(",\t");
+        // }
+        // printf("\n");
+        // UpdateMotorState(&motor0);
+        // SetMotorDuty(&motor0, duty);
+        uint8_t error = MA730_CheckError(CS_ENC0DRV0_PORT, CS_ENC0_PIN);
+        for (int i = 7; i >= 0; i--) {
+            printf("%d", (error >> i) & 1);
+        }
+        printf(",\n");
+
+        // if (error != MA730_NoError) {
+        //     printf("Encoder error: %d", error);
+        // }
+        // // printf("PositionSetpoint:%0.2f,\t", position_setpoint);
+        // printf("Position:%.3f,\t", motor0.state.position);
+        // printf("Velocity:%.3f,\t", motor0.state.velocity);
+        // printf("Current:%.3f,\t", motor0.state.current);
         // printf("Duty:%.5f,\t", duty);
         // printf("\n");
-        uint16_t angle = readMagAlphaAngle(GPIOA, GPIO_PIN_3);
-        printf("angle:%d,ADC0:%d,ADC1:%d,ADC2:%d\n", angle, readAdc(0),
-               readAdc(1), readAdc(2));
     }
 }
 
@@ -117,13 +118,23 @@ int main() {
     HAL_NVIC_SetPriority(TIM2_IRQn, 1, 0);
     HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 
-    TIM1->CCR1 = 0;
-    TIM1->CCR2 = 500;
-    TIM3->CCR1 = 0;
-    TIM3->CCR2 = 500;
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7,
                       GPIO_PIN_RESET);
+
     while (1) {
+        // // DRV SPI test:
+        // for (uint8_t registerAddress = 0; registerAddress <= 5;
+        //      ++registerAddress) {
+        //     uint16_t response = DRV8873_ReadRegister(
+        //         CS_ENC0DRV0_PORT, CS_DRV0_PIN, registerAddress);
+        //     printf("R%d:", registerAddress);
+        //     for (int i = 15; i >= 0; i--) {
+        //         printf("%d", (response >> i) & 1);
+        //     }
+        //     printf(",\t");
+        // }
+        // printf("\n");
+
         HAL_Delay(1000);
         HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4);
     }
