@@ -8,12 +8,10 @@ struct pid_controller {
     float Ki;
     float Kd;
     float Kaw;
-    float d_d;
     float deadzone;
     float u_max;
     float du_max;
     float prevE;
-    float prevUd;
     float prevUi;
     float prevU;
     float antiwindup_correction;

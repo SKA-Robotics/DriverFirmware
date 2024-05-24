@@ -4,7 +4,7 @@
 #include "stm32f1xx_hal.h"
 
 #define MAX_PWM 1023
-#define DELTA_TIME 0.005f
+#define DELTA_TIME 0.01f
 
 #define UART_TX_PIN GPIO_PIN_10
 #define UART_RX_PIN GPIO_PIN_11

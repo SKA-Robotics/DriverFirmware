@@ -19,7 +19,6 @@ void SetMotorDuty(motor_t* motor, float duty) {
 }
 
 void UpdateMotorState(motor_t* motor) {
-    uint8_t error = MA730_NoError;
     uint16_t positionMeasurement =
         MA730_ReadAngle(motor->encoderCsPort, motor->encoderCsPin);
     long deltaPositionRaw =

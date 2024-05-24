@@ -8,8 +8,7 @@ float StepPid(pid_controller_t* pid, float e) {
         e = 0.0f;
     }
 
-    float u_d =
-        (1 - pid->d_d) * (e - pid->prevE) / DELTA_TIME + pid->d_d * pid->prevUd;
+    float u_d = (e - pid->prevE) / DELTA_TIME;
     float u_i =
         e * DELTA_TIME + pid->prevUi + pid->Kaw * pid->antiwindup_correction;
     float u_raw = pid->Kp * e + pid->Ki * u_i + pid->Kd * u_d;
@@ -35,7 +34,6 @@ float StepPid(pid_controller_t* pid, float e) {
 
     pid->prevE = e;
     pid->prevU = u;
-    pid->prevUd = u_d;
     pid->prevUi = u_i;
     return u;
 }
