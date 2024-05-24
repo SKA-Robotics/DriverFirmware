@@ -10,6 +10,7 @@ motor_t motor0 = {
     .adcChannel = ADC_MOTOR0_CURRENT,
     .encoderCsPort = CS_ENC0DRV0_PORT,
     .encoderCsPin = CS_ENC0_PIN,
+    .positionOffset = 0.0f,
     .state = {0}, // Default initial state
 };
 motor_t motor1 = {
@@ -18,6 +19,7 @@ motor_t motor1 = {
     .adcChannel = ADC_MOTOR1_CURRENT,
     .encoderCsPort = CS_ENC1DRV1_PORT,
     .encoderCsPin = CS_ENC1_PIN,
+    .positionOffset = 0.0f,
     .state = {0}, // Default initial state
 };
 
@@ -32,21 +34,21 @@ motor_controller_t motorController0 = {
                .minPosition = -INFINITY,
                .maxPosition = +INFINITY},
     .currentPid = {.Kp = 1.0f,
-                   .Ki = 0.0f,
+                   .Ki = 0.1f,
                    .Kd = 0.0f,
                    .Kaw = 0.8f,
                    .deadzone = 0.01f,
                    .du_max = +INFINITY,
                    .u_max = +INFINITY},
     .velocityPid = {.Kp = 1.0f,
-                    .Ki = 0.0f,
+                    .Ki = 0.1f,
                     .Kd = 0.0f,
                     .Kaw = 0.8f,
                     .deadzone = 0.01f,
                     .du_max = +INFINITY,
                     .u_max = +INFINITY},
-    .positionPid = {.Kp = 1.0f,
-                    .Ki = 0.0f,
+    .positionPid = {.Kp = 3.0f,
+                    .Ki = 0.2f,
                     .Kd = 0.0f,
                     .Kaw = 0.8f,
                     .deadzone = 0.01f,
@@ -138,10 +140,10 @@ int main() {
     HAL_TIM_Base_Start_IT(&htim4);
 
     while (1) {
-        HAL_Delay(3000);
-        float random = (float)(HAL_GetTick() * 145 % 2000) / 1000.0f - 1.0f;
-        printf("Setting velocity to %.02f\n", random);
-        motorControllerSetVelocitySetpoint(&motorController0, random);
+        float random = (float)(HAL_GetTick() * 145 % 6000) / 1000.0f - 3.0f;
+        printf("Setting position to %.02f\n", random);
+        motorControllerSetPositionSetpoint(&motorController0, random);
+        HAL_Delay(5000);
     }
 }
 

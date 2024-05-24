@@ -39,6 +39,7 @@ struct motor {
     uint32_t adcChannel;
     GPIO_TypeDef* encoderCsPort; // Port of encoder chip select pin
     uint16_t encoderCsPin;       // Encoder chip select pin
+    float positionOffset;        // Motor position offset
     motor_state_t state;         // Current state of the motor
 };
 

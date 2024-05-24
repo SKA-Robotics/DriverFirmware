@@ -10,19 +10,13 @@
 #define ROBOSZPON_AXIS_STATE_ERROR 0x02
 
 typedef struct {
-    float command_timeout;
-    // axis parameters
-} roboszpon_axis_params_t;
-
-typedef struct {
-    uint8_t nodeId;
-    uint8_t state;
-    motor_t* motor;
-    motor_controller_t* motorController;
-    GPIO_TypeDef* errorLedPort;
-    uint16_t errorLedPin;
-    roboszpon_axis_params_t params;
-    // axis elements (motor, controller, message queue, etc)
+    uint8_t nodeId; // CAN node ID of the motor axis
+    uint8_t state;  // Current state of the axis state machine
+    motor_t* motor; // Pointer to the motor corresponding to the axis
+    motor_controller_t* motorController; // Pointer to motor controller
+    GPIO_TypeDef* errorLedPort;          // GPIO port of the error LED
+    uint16_t errorLedPin;                // GPIO pin of the error LED
+    float command_timeout;               // Command timeout (seconds)
 } roboszpon_axis_t;
 
 void roboszponAxisStep(roboszpon_axis_t* axis);

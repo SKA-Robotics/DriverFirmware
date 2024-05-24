@@ -36,6 +36,7 @@ void UpdateMotorState(motor_t* motor) {
     motor->state.positionRaw += deltaPositionRaw;
 
     motor->state.position =
+        motor->positionOffset +
         (float)motor->state.positionRaw / ENCODER_RESOLUTION;
 
     motor->state.velocity =
