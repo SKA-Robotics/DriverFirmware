@@ -49,7 +49,7 @@ void MA730_WriteRegister(GPIO_TypeDef* csPort, uint16_t csPin,
     HAL_GPIO_WritePin(csPort, csPin, GPIO_PIN_SET);
 }
 
-uint8_t MA730_CheckError(GPIO_TypeDef* csPort, uint16_t csPin) {
+uint8_t MA730_GetError(GPIO_TypeDef* csPort, uint16_t csPin) {
     uint16_t flags = MA730_ReadRegister(csPort, csPin, 0x1b);
     // Check for disconnected device
     // The device should return 0x00 as a second byte when responding to a read

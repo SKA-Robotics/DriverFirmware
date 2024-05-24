@@ -99,22 +99,24 @@ void MX_GPIO_Init(void) {
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     HAL_GPIO_Init(NFAULT1_PORT, &GPIO_InitStruct);
 
-    // GPIO_InitStruct.Pin = GPIO_PIN_8; // CAN: Rx
-    // GPIO_InitStruct.Mode = GPIO_MODE_AF_INPUT;
-    // GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    // HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    // CAN pins
+    GPIO_InitStruct.Pin = CAN_RX_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(CAN_PORT, &GPIO_InitStruct);
 
-    // GPIO_InitStruct.Pin = GPIO_PIN_9; // CAN: Tx
-    // GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    // GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    // HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = CAN_TX_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(CAN_PORT, &GPIO_InitStruct);
 
     // // Remap alternate functions
     __HAL_AFIO_REMAP_SWJ_NOJTAG();
     __HAL_AFIO_REMAP_TIM1_PARTIAL();
     __HAL_AFIO_REMAP_TIM3_ENABLE();
     __HAL_AFIO_REMAP_USART3_DISABLE();
-    // __HAL_AFIO_REMAP_CAN1_2();
+    __HAL_AFIO_REMAP_CAN1_1();
 }
 
 void MX_TIM2_Init(void) {
@@ -251,30 +253,21 @@ void MX_CAN_Init(void) {
     // (18,000,000 Hz / 2) / 500,000 Hz = 18 time quanta
     // One time quant is used for start bit, the rest
     // is distributed among BS1 and BS2.
-    hcan.Init.Prescaler = 2;
+    hcan.Init.Prescaler = 24;
     hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
-    hcan.Init.TimeSeg1 = CAN_BS1_9TQ;
-    hcan.Init.TimeSeg2 = CAN_BS2_8TQ;
+    hcan.Init.TimeSeg1 = CAN_BS1_1TQ;
+    hcan.Init.TimeSeg2 = CAN_BS2_1TQ;
     hcan.Init.TimeTriggeredMode = DISABLE;
-    hcan.Init.AutoBusOff = ENABLE;
+    hcan.Init.AutoBusOff = DISABLE;
     hcan.Init.AutoWakeUp = DISABLE;
-    hcan.Init.AutoRetransmission = ENABLE;
+    hcan.Init.AutoRetransmission = DISABLE;
     hcan.Init.ReceiveFifoLocked = DISABLE;
     hcan.Init.TransmitFifoPriority = DISABLE;
-    HAL_StatusTypeDef result = HAL_CAN_Init(&hcan);
-    printf("Initializing can...\n");
-    if (result == HAL_OK) {
-        printf("Can initialized\n");
-    } else {
-        printf("Error");
-    }
-    printf("Starting can...\n");
-    result = HAL_CAN_Start(&hcan);
-    if (result == HAL_OK) {
-        printf("Can started\n");
-    } else {
-        printf("Error");
-    }
+    HAL_CAN_Init(&hcan);
+    HAL_CAN_Start(&hcan);
+    HAL_CAN_ActivateNotification(&hcan, CAN_IT_TX_MAILBOX_EMPTY |
+                                            CAN_IT_RX_FIFO0_MSG_PENDING |
+                                            CAN_IT_BUSOFF);
 }
 
 uint16_t readAdc(uint32_t channel) { return adcBuffer[channel]; }

@@ -1,9 +1,12 @@
-#include "motor.h"
-#include "output.h"
-// #include "pid.h"
 #include "drv8873_driver.h"
 #include "mag_alpha_driver.h"
+#include "motor.h"
+#include "output.h"
+#include "roboszpon_axis.h"
 #include "system.h"
+
+roboszpon_axis_t axis0 = {.state = ROBOSZPON_AXIS_STATE_STOPPED};
+roboszpon_axis_t axis1 = {.state = ROBOSZPON_AXIS_STATE_STOPPED};
 
 motor_t motor0 = {
     .pwmChannelForward = &TIM3->CCR1,
@@ -31,6 +34,7 @@ int count = 12;
 int counter = 0;
 
 void ControlLoop() {
+    roboszpon_axis_step(&axis0);
     // int potentiometer = readAdc(ADC_CHANNEL_2);
     // float setpoint = 0.9f * setpoint + 0.1f * (potentiometer - 2048) /
     // 2048.0f; float position_setpoint = 10.0f * setpoint;
@@ -94,7 +98,7 @@ int main() {
     MX_TIM2_Init();
     MX_ADC_Init();
     MX_SPI_Init();
-    // MX_CAN_Init();
+    MX_CAN_Init();
 
     HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 2, 0);
     HAL_NVIC_SetPriority(TIM2_IRQn, 1, 0);
@@ -105,18 +109,42 @@ int main() {
 
     while (1) {
         // // DRV SPI test:
-        for (uint8_t registerAddress = 0; registerAddress <= 5;
-             ++registerAddress) {
-            uint16_t response = DRV8873_ReadRegister(
-                CS_ENC0DRV0_PORT, CS_DRV0_PIN, registerAddress);
-            printf("R%d:", registerAddress);
-            for (int i = 15; i >= 0; i--) {
-                printf("%d", (response >> i) & 1);
-            }
-            printf(",\t");
+        // for (uint8_t registerAddress = 0; registerAddress <= 5;
+        //      ++registerAddress) {
+        //     uint16_t response = DRV8873_ReadRegister(
+        //         CS_ENC0DRV0_PORT, CS_DRV0_PIN, registerAddress);
+        //     printf("R%d:", registerAddress);
+        //     for (int i = 15; i >= 0; i--) {
+        //         printf("%d", (response >> i) & 1);
+        //     }
+        //     printf(",\t");
+        // }
+        CAN_TxHeaderTypeDef TxHeader;
+        uint8_t TxData[8];
+        uint32_t TxMailbox;
+
+        TxHeader.StdId = 0x321;
+        TxHeader.ExtId = 0x01;
+        TxHeader.RTR = CAN_RTR_DATA;
+        TxHeader.IDE = CAN_ID_STD;
+        TxHeader.DLC = 2;
+        TxHeader.TransmitGlobalTime = DISABLE;
+
+        TxData[0] = 0xAB;
+        TxData[1] = 0xCD;
+
+        if (HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox) !=
+            HAL_OK) {
+            printf("CAN Error\n");
+        } else {
+            printf("CAN OK\n");
         }
-        printf("\n");
+        while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan) < 1) {
+            HAL_Delay(1000);
+            printf("All mailboxes full...\n");
+        }
         HAL_Delay(1000);
+
         HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4);
     }
 }
