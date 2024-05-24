@@ -14,6 +14,7 @@ typedef struct {
 } roboszpon_axis_params_t;
 
 typedef struct {
+    uint8_t nodeId;
     uint8_t state;
     motor_t* motor;
     GPIO_TypeDef* errorLedPort;

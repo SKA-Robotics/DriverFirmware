@@ -36,8 +36,12 @@ void MainLoop() {
 }
 
 void MotorControlLoop() {
-    // axis0.motor_controller.step();
-    // axis1.motor_controller.step();
+    if (axis0.state = ROBOSZPON_AXIS_STATE_RUNNING) {
+        // axis0.motor_controller.step();
+    }
+    if (axis1.state = ROBOSZPON_AXIS_STATE_RUNNING) {
+        // axis1.motor_controller.step();
+    }
 }
 
 int main() {
@@ -61,7 +65,9 @@ int main() {
                       GPIO_PIN_RESET);
     HAL_GPIO_WritePin(LED_PORT, LED_POWER_PIN, GPIO_PIN_SET);
 
-    axis0.state = ROBOSZPON_AXIS_STATE_RUNNING;
+    // Start the timers, begin working
+    HAL_TIM_Base_Start_IT(&htim2);
+    HAL_TIM_Base_Start_IT(&htim4);
     while (1) {
     }
 }

@@ -129,7 +129,6 @@ void MX_TIM2_Init(void) {
     htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     HAL_TIM_Base_Init(&htim2);
     HAL_NVIC_EnableIRQ(TIM2_IRQn);
-    HAL_TIM_Base_Start_IT(&htim2);
 }
 
 void MX_TIM4_Init(void) {
@@ -142,7 +141,6 @@ void MX_TIM4_Init(void) {
     htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     HAL_TIM_Base_Init(&htim4);
     HAL_NVIC_EnableIRQ(TIM4_IRQn);
-    HAL_TIM_Base_Start_IT(&htim4);
 }
 
 void MX_PWM_Init(void) {
