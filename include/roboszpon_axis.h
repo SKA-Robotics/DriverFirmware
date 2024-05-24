@@ -2,6 +2,7 @@
 #define ROBOSZPON_AXIS_H
 
 #include <motor.h>
+#include <motor_controller.h>
 #include <stdint.h>
 
 #define ROBOSZPON_AXIS_STATE_STOPPED 0x00
@@ -17,6 +18,7 @@ typedef struct {
     uint8_t nodeId;
     uint8_t state;
     motor_t* motor;
+    motor_controller_t* motorController;
     GPIO_TypeDef* errorLedPort;
     uint16_t errorLedPin;
     roboszpon_axis_params_t params;

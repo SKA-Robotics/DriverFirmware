@@ -11,7 +11,6 @@ motor_t motor0 = {
     .encoderCsPin = CS_ENC0_PIN,
     .state = {0}, // Default initial state
 };
-
 motor_t motor1 = {
     .pwmChannelForward = &TIM1->CCR1,
     .pwmChannelReverse = &TIM1->CCR2,
@@ -21,12 +20,20 @@ motor_t motor1 = {
     .state = {0}, // Default initial state
 };
 
-roboszpon_axis_t axis0 = {.state = ROBOSZPON_AXIS_STATE_STOPPED,
+motor_controller_t motorController0 = {
+    .motor = &motor0, .params = {.minDuty = -1.0f, .maxDuty = 1.0f}};
+
+motor_controller_t motorController1 = {
+    .motor = &motor1, .params = {.minDuty = -1.0f, .maxDuty = 1.0f}};
+
+roboszpon_axis_t axis0 = {.state = ROBOSZPON_AXIS_STATE_RUNNING,
                           .motor = &motor0,
+                          .motorController = &motorController0,
                           .errorLedPort = LED_PORT,
                           .errorLedPin = LED_ENC0_PIN};
-roboszpon_axis_t axis1 = {.state = ROBOSZPON_AXIS_STATE_STOPPED,
+roboszpon_axis_t axis1 = {.state = ROBOSZPON_AXIS_STATE_RUNNING,
                           .motor = &motor1,
+                          .motorController = &motorController1,
                           .errorLedPort = LED_PORT,
                           .errorLedPin = LED_ENC1_PIN};
 
@@ -36,11 +43,11 @@ void MainLoop() {
 }
 
 void MotorControlLoop() {
-    if (axis0.state = ROBOSZPON_AXIS_STATE_RUNNING) {
-        // axis0.motor_controller.step();
+    if (axis0.state == ROBOSZPON_AXIS_STATE_RUNNING) {
+        motorControllerStep(axis0.motorController);
     }
-    if (axis1.state = ROBOSZPON_AXIS_STATE_RUNNING) {
-        // axis1.motor_controller.step();
+    if (axis1.state == ROBOSZPON_AXIS_STATE_RUNNING) {
+        motorControllerStep(axis1.motorController);
     }
 }
 
@@ -69,6 +76,10 @@ int main() {
     HAL_TIM_Base_Start_IT(&htim2);
     HAL_TIM_Base_Start_IT(&htim4);
     while (1) {
+        HAL_Delay(3000);
+        float random = (float)(HAL_GetTick() * 145 % 2000) / 1000.0f - 1.0f;
+        printf("Setting duty to %.02f\n", random);
+        motorControllerSetDutySetpoint(&motorController0, random);
     }
 }
 

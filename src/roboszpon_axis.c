@@ -4,7 +4,7 @@
 uint8_t roboszponAxisCheckError(roboszpon_axis_t* axis) {
     uint8_t encoderError =
         MA730_GetError(axis->motor->encoderCsPort, axis->motor->encoderCsPin);
-    // TODO: check for other errors.
+    // TODO: check for other errors. (Command timeout included)
     return encoderError;
 }
 
