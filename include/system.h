@@ -51,6 +51,7 @@
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
+TIM_HandleTypeDef htim4;
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma1;
 SPI_HandleTypeDef hspi1;
@@ -61,6 +62,7 @@ void SystemClock_Config(void);
 void MX_GPIO_Init(void);
 void MX_PWM_Init(void);
 void MX_TIM2_Init(void);
+void MX_TIM4_Init(void);
 void MX_ADC_Init(void);
 void MX_SPI_Init(void);
 void MX_USART3_UART_Init(void);
