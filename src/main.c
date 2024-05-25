@@ -89,14 +89,19 @@ motor_controller_t motorController1 = {
                     .u_max = +INFINITY},
 };
 
-roboszpon_axis_t axis0 = {.state = ROBOSZPON_AXIS_STATE_RUNNING,
+message_queue_t messageQueue0;
+message_queue_t messageQueue1;
+
+roboszpon_axis_t axis0 = {.state = ROBOSZPON_AXIS_STATE_STOPPED,
                           .motor = &motor0,
                           .motorController = &motorController0,
+                          .messageQueue = &messageQueue0,
                           .errorLedPort = LED_PORT,
                           .errorLedPin = LED_ENC0_PIN};
-roboszpon_axis_t axis1 = {.state = ROBOSZPON_AXIS_STATE_RUNNING,
+roboszpon_axis_t axis1 = {.state = ROBOSZPON_AXIS_STATE_STOPPED,
                           .motor = &motor1,
                           .motorController = &motorController1,
+                          .messageQueue = &messageQueue1,
                           .errorLedPort = LED_PORT,
                           .errorLedPin = LED_ENC1_PIN};
 
@@ -125,6 +130,8 @@ int main() {
     MX_ADC_Init();
     MX_SPI_Init();
     MX_CAN_Init();
+    MessageQueue_Init(&messageQueue0);
+    MessageQueue_Init(&messageQueue1);
     // Set interrupt priorities
     HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 2, 0);
     HAL_NVIC_SetPriority(TIM2_IRQn, 1, 0);
@@ -140,6 +147,7 @@ int main() {
     HAL_TIM_Base_Start_IT(&htim4);
 
     while (1) {
+
         float random = (float)(HAL_GetTick() * 145 % 6000) / 1000.0f - 3.0f;
         printf("Setting position to %.02f\n", random);
         motorControllerSetPositionSetpoint(&motorController0, random);

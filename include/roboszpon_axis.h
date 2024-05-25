@@ -1,6 +1,7 @@
 #ifndef ROBOSZPON_AXIS_H
 #define ROBOSZPON_AXIS_H
 
+#include <message_queue.h>
 #include <motor.h>
 #include <motor_controller.h>
 #include <stdint.h>
@@ -14,6 +15,7 @@ typedef struct {
     uint8_t state;  // Current state of the axis state machine
     motor_t* motor; // Pointer to the motor corresponding to the axis
     motor_controller_t* motorController; // Pointer to motor controller
+    message_queue_t* messageQueue;       // Message queue pointer
     GPIO_TypeDef* errorLedPort;          // GPIO port of the error LED
     uint16_t errorLedPin;                // GPIO pin of the error LED
     float command_timeout;               // Command timeout (seconds)
