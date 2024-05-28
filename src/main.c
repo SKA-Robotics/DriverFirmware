@@ -197,16 +197,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
-    // CAN_RxHeaderTypeDef RxHeader;
-    // uint8_t RxData[8];
-    printf("CAN Message received.\n");
-    // HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
-    // printf("ID%d\t", RxHeader.StdId);
-    // printf("%d ", RxData[0]);
-    // printf("%d ", RxData[1]);
-    // printf("%d ", RxData[2]);
-    // printf("%d ", RxData[3]);
-    // printf("%d ", RxData[5]);
-    // printf("%d ", RxData[6]);
-    // printf("%d\n", RxData[7]);
+    CAN_RxHeaderTypeDef RxHeader;
+    uint8_t RxData[8];
+    printf("CAN Message received: ");
+    HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
+    printf("ID%d\t", RxHeader.StdId);
+    printf("%d ", RxData[0]);
+    printf("%d ", RxData[1]);
+    printf("%d ", RxData[2]);
+    printf("%d ", RxData[3]);
+    printf("%d ", RxData[5]);
+    printf("%d ", RxData[6]);
+    printf("%d\n", RxData[7]);
 }

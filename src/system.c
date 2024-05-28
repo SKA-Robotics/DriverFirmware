@@ -275,9 +275,8 @@ void MX_CAN_Init(void) {
     if (HAL_CAN_Init(&hcan) != HAL_OK) {
         ErrorHandler();
     }
-
     CAN_FilterTypeDef sFilterConfig;
-    sFilterConfig.FilterActivation = DISABLE;
+    sFilterConfig.FilterActivation = ENABLE;
     sFilterConfig.FilterBank = 0;
     sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
     sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
