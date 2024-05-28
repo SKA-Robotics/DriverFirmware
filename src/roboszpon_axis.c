@@ -29,7 +29,6 @@ void roboszponAxisStoppedStep(roboszpon_axis_t* axis) {
     // mode messages If ARM command is received, set mode to
     // ROBOSZPON_AXIS_STATE_RUNNING
     while (!MessageQueue_IsEmpty(axis->messageQueue)) {
-        printf("Checking a message...\n");
         roboszpon_message_t message;
         MessageQueue_Dequeue(axis->messageQueue, &message);
         switch (message.id) {
@@ -45,6 +44,7 @@ void roboszponAxisStoppedStep(roboszpon_axis_t* axis) {
             break;
         case MSG_ACTION_REQUEST:
             if (message.data == ACTION_ARM) {
+                printf("Armed\n");
                 axis->state = ROBOSZPON_AXIS_STATE_RUNNING;
             }
             // TODO: implement all the other actions
@@ -65,6 +65,7 @@ void roboszponAxisRunningStep(roboszpon_axis_t* axis) {
     if (roboszponAxisCheckError(axis) != 0) {
         SetMotorDuty(axis->motor, 0.0f);
         HAL_GPIO_WritePin(axis->errorLedPort, axis->errorLedPin, GPIO_PIN_SET);
+        printf("Error detected\n");
         axis->state = ROBOSZPON_AXIS_STATE_ERROR;
     }
     int isThereAMotorCommand = 0;
@@ -81,6 +82,7 @@ void roboszponAxisRunningStep(roboszpon_axis_t* axis) {
         case MSG_ACTION_REQUEST:
             if (message.data == ACTION_DISARM) {
                 SetMotorDuty(axis->motor, 0.0f);
+                printf("Disarmed\n");
                 axis->state = ROBOSZPON_AXIS_STATE_STOPPED;
                 return;
             }
@@ -107,6 +109,7 @@ void roboszponAxisErrorStep(roboszpon_axis_t* axis) {
             if (message.data == ACTION_DISARM) {
                 HAL_GPIO_WritePin(axis->errorLedPort, axis->errorLedPin,
                                   GPIO_PIN_RESET);
+                printf("Disarmed\n");
                 axis->state = ROBOSZPON_AXIS_STATE_STOPPED;
             }
         }
@@ -116,6 +119,7 @@ void roboszponAxisErrorStep(roboszpon_axis_t* axis) {
     if (roboszponAxisCheckError(axis) == 0) {
         HAL_GPIO_WritePin(axis->errorLedPort, axis->errorLedPin,
                           GPIO_PIN_RESET);
+        printf("Error is gone\n");
         axis->state = ROBOSZPON_AXIS_STATE_RUNNING;
     }
 }

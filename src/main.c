@@ -92,13 +92,15 @@ motor_controller_t motorController1 = {
 message_queue_t messageQueue0;
 message_queue_t messageQueue1;
 
-roboszpon_axis_t axis0 = {.state = ROBOSZPON_AXIS_STATE_STOPPED,
+roboszpon_axis_t axis0 = {.nodeId = 0x1,
+                          .state = ROBOSZPON_AXIS_STATE_STOPPED,
                           .motor = &motor0,
                           .motorController = &motorController0,
                           .messageQueue = &messageQueue0,
                           .errorLedPort = LED_PORT,
                           .errorLedPin = LED_ENC0_PIN};
-roboszpon_axis_t axis1 = {.state = ROBOSZPON_AXIS_STATE_STOPPED,
+roboszpon_axis_t axis1 = {.nodeId = 0x2,
+                          .state = ROBOSZPON_AXIS_STATE_STOPPED,
                           .motor = &motor1,
                           .motorController = &motorController1,
                           .messageQueue = &messageQueue1,
@@ -137,7 +139,7 @@ int main() {
     HAL_NVIC_SetPriority(TIM2_IRQn, 0, 1);
     HAL_NVIC_SetPriority(TIM4_IRQn, 2, 0);
     HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
-    HAL_NVIC_SetPriority(USB_LP_CAN1_RX0_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(USB_LP_CAN1_RX0_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
 
     HAL_GPIO_WritePin(LED_PORT, LED_CAN_PIN | LED_ENC0_PIN | LED_ENC1_PIN,
@@ -149,35 +151,32 @@ int main() {
     HAL_TIM_Base_Start_IT(&htim4);
 
     while (1) {
-        CAN_TxHeaderTypeDef TxHeader;
-        uint8_t TxData[8];
-        uint32_t TxMailbox;
+        // CAN_TxHeaderTypeDef TxHeader;
+        // uint8_t TxData[8];
+        // uint32_t TxMailbox;
 
-        TxHeader.DLC = 8;
-        TxHeader.IDE = CAN_ID_STD;
-        TxHeader.RTR = CAN_RTR_DATA;
-        TxHeader.StdId = 0x001;
+        // TxHeader.DLC = 8;
+        // TxHeader.IDE = CAN_ID_STD;
+        // TxHeader.RTR = CAN_RTR_DATA;
+        // TxHeader.StdId = 0x001;
 
-        TxData[0] = 0x21;
-        TxData[1] = 0x37;
-        TxData[2] = 0x69;
-        TxData[3] = 0x21;
-        TxData[4] = 0x37;
-        TxData[5] = 0x69;
-        TxData[6] = 0xAA;
-        TxData[7] = 0xAA;
+        // TxData[0] = 0x21;
+        // TxData[1] = 0x37;
+        // TxData[2] = 0x69;
+        // TxData[3] = 0x21;
+        // TxData[4] = 0x37;
+        // TxData[5] = 0x69;
+        // TxData[6] = 0xAA;
+        // TxData[7] = 0xAA;
 
-        if (HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox) !=
-            HAL_OK) {
-            printf("CAN error\n");
-        } else {
-            printf("CAN ok.\n");
-        }
+        // if (HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox) !=
+        //     HAL_OK) {
+        //     printf("CAN error\n");
+        // } else {
+        //     printf("CAN ok.\n");
+        // }
 
-        uint32_t fillLevel = HAL_CAN_GetRxFifoFillLevel(&hcan, CAN_RX_FIFO0);
-        printf("Rx Fifo fill level: %d\n");
-
-        HAL_Delay(5000);
+        // HAL_Delay(5000);
     }
 }
 
@@ -199,14 +198,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
     CAN_RxHeaderTypeDef RxHeader;
     uint8_t RxData[8];
-    printf("CAN Message received: ");
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
-    printf("ID%d\t", RxHeader.StdId);
-    printf("%d ", RxData[0]);
-    printf("%d ", RxData[1]);
-    printf("%d ", RxData[2]);
-    printf("%d ", RxData[3]);
-    printf("%d ", RxData[5]);
-    printf("%d ", RxData[6]);
-    printf("%d\n", RxData[7]);
+    roboszpon_message_t message =
+        interpretCanMessage(RxHeader.StdId, RxHeader.DLC, RxData);
+    if (message.nodeId == axis0.nodeId) {
+        MessageQueue_Enqueue(axis0.messageQueue, message);
+    } else if (message.nodeId == axis1.nodeId) {
+        MessageQueue_Enqueue(axis1.messageQueue, message);
+    } else if (message.nodeId == NODEID_BROADCAST) {
+        MessageQueue_Enqueue(axis0.messageQueue, message);
+        MessageQueue_Enqueue(axis1.messageQueue, message);
+    }
 }

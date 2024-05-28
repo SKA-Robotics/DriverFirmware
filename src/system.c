@@ -275,6 +275,7 @@ void MX_CAN_Init(void) {
     if (HAL_CAN_Init(&hcan) != HAL_OK) {
         ErrorHandler();
     }
+    // TODO: Skonfiguruj porządnie filtr
     CAN_FilterTypeDef sFilterConfig;
     sFilterConfig.FilterActivation = ENABLE;
     sFilterConfig.FilterBank = 0;

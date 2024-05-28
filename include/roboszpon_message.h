@@ -4,18 +4,22 @@
 #include <stdint.h>
 
 typedef struct {
+    uint8_t nodeId;
     uint8_t id;
     uint64_t data;
 } roboszpon_message_t;
 
-#define MSG_STATUS_REPORT 0x01
-#define MSG_AXIS_REPORT 0x02
-#define MSG_MOTOR_REPORT 0x03
-#define MSG_ACTION_REQUEST 0x04
-#define MSG_PARAMETER_WRITE 0x05
-#define MSG_PARAMETER_READ 0x06
-#define MSG_PARAMETER_RESPONSE 0x07
-#define MSG_MOTOR_COMMAND 0x08
+#define NODEID_BROADCAST 0x00
+
+#define MSG_EMERGENCY_STOP 0x00
+#define MSG_MOTOR_COMMAND 0x01
+#define MSG_ACTION_REQUEST 0x02
+#define MSG_STATUS_REPORT 0x03
+#define MSG_AXIS_REPORT 0x04
+#define MSG_MOTOR_REPORT 0x05
+#define MSG_PARAMETER_WRITE 0x06
+#define MSG_PARAMETER_READ 0x07
+#define MSG_PARAMETER_RESPONSE 0x08
 
 #define ACTION_ARM 0x00
 #define ACTION_DISARM 0x01
@@ -30,5 +34,8 @@ typedef struct {
 #define CTRLSIGNAL_DUTY 0x00
 #define CTRLSIGNAL_VELOCITY 0x01
 #define CTRLSIGNAL_POSITION 0x02
+
+roboszpon_message_t interpretCanMessage(uint32_t frameId, uint8_t dataLength,
+                                        uint8_t* data);
 
 #endif // ROBOSZPON_MESSAGE_H
