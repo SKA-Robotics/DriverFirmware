@@ -133,10 +133,12 @@ int main() {
     MessageQueue_Init(&messageQueue0);
     MessageQueue_Init(&messageQueue1);
     // Set interrupt priorities
-    HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 2, 0);
-    HAL_NVIC_SetPriority(TIM2_IRQn, 1, 0);
-    HAL_NVIC_SetPriority(TIM4_IRQn, 2, 1);
+    HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 2);
+    HAL_NVIC_SetPriority(TIM2_IRQn, 0, 1);
+    HAL_NVIC_SetPriority(TIM4_IRQn, 2, 0);
     HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(USB_LP_CAN1_RX0_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
 
     HAL_GPIO_WritePin(LED_PORT, LED_CAN_PIN | LED_ENC0_PIN | LED_ENC1_PIN,
                       GPIO_PIN_RESET);
@@ -154,7 +156,7 @@ int main() {
         TxHeader.DLC = 8;
         TxHeader.IDE = CAN_ID_STD;
         TxHeader.RTR = CAN_RTR_DATA;
-        TxHeader.StdId = 0x069;
+        TxHeader.StdId = 0x001;
 
         TxData[0] = 0x21;
         TxData[1] = 0x37;
@@ -172,13 +174,19 @@ int main() {
             printf("CAN ok.\n");
         }
 
-        HAL_Delay(500);
+        uint32_t fillLevel = HAL_CAN_GetRxFifoFillLevel(&hcan, CAN_RX_FIFO0);
+        printf("Rx Fifo fill level: %d\n");
+
+        HAL_Delay(5000);
     }
 }
 
 void SysTick_Handler(void) { HAL_IncTick(); }
 void TIM2_IRQHandler(void) { HAL_TIM_IRQHandler(&htim2); }
 void TIM4_IRQHandler(void) { HAL_TIM_IRQHandler(&htim4); }
+void USB_LP_CAN1_RX0_IRQHandler(void) {
+    HAL_CAN_RxFifo0MsgPendingCallback(&hcan);
+}
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
     if (htim == &htim2) {
@@ -186,4 +194,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
     } else if (htim == &htim4) {
         MainLoop();
     }
+}
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
+    // CAN_RxHeaderTypeDef RxHeader;
+    // uint8_t RxData[8];
+    printf("CAN Message received.\n");
+    // HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
+    // printf("ID%d\t", RxHeader.StdId);
+    // printf("%d ", RxData[0]);
+    // printf("%d ", RxData[1]);
+    // printf("%d ", RxData[2]);
+    // printf("%d ", RxData[3]);
+    // printf("%d ", RxData[5]);
+    // printf("%d ", RxData[6]);
+    // printf("%d\n", RxData[7]);
 }

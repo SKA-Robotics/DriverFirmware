@@ -74,4 +74,6 @@ volatile static uint16_t adcBuffer[ADC_CHANNELS];
 
 uint16_t readAdc(uint32_t channel);
 
+void ErrorHandler(void);
+
 #endif // SYSTEM_H

@@ -236,7 +236,9 @@ void MX_SPI_Init(void) {
     hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
     hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
     hspi1.Init.CRCPolynomial = 7;
-    HAL_SPI_Init(&hspi1);
+    if (HAL_SPI_Init(&hspi1) != HAL_OK) {
+        ErrorHandler();
+    }
     __HAL_SPI_ENABLE(&hspi1);
 }
 
@@ -250,7 +252,9 @@ void MX_USART3_UART_Init(void) {
     huart.Init.Mode = UART_MODE_TX_RX;
     huart.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     huart.Init.OverSampling = UART_OVERSAMPLING_16;
-    HAL_UART_Init(&huart);
+    if (HAL_UART_Init(&huart) != HAL_OK) {
+        ErrorHandler();
+    }
 }
 
 void MX_CAN_Init(void) {
@@ -265,12 +269,15 @@ void MX_CAN_Init(void) {
     hcan.Init.TimeTriggeredMode = DISABLE;
     hcan.Init.AutoBusOff = DISABLE;
     hcan.Init.AutoWakeUp = DISABLE;
-    hcan.Init.AutoRetransmission = DISABLE;
+    hcan.Init.AutoRetransmission = ENABLE;
     hcan.Init.ReceiveFifoLocked = DISABLE;
     hcan.Init.TransmitFifoPriority = DISABLE;
-    HAL_CAN_Init(&hcan);
+    if (HAL_CAN_Init(&hcan) != HAL_OK) {
+        ErrorHandler();
+    }
 
     CAN_FilterTypeDef sFilterConfig;
+    sFilterConfig.FilterActivation = DISABLE;
     sFilterConfig.FilterBank = 0;
     sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
     sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
@@ -279,15 +286,25 @@ void MX_CAN_Init(void) {
     sFilterConfig.FilterMaskIdHigh = 0x0000;
     sFilterConfig.FilterMaskIdLow = 0x0000;
     sFilterConfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-    sFilterConfig.FilterActivation = ENABLE;
     sFilterConfig.SlaveStartFilterBank = 14;
-
-    HAL_CAN_ConfigFilter(&hcan, &sFilterConfig);
-
-    (HAL_CAN_Start(&hcan) != HAL_OK);
-    // HAL_CAN_ActivateNotification(&hcan, CAN_IT_TX_MAILBOX_EMPTY |
-    //                                         CAN_IT_RX_FIFO0_MSG_PENDING |
-    //                                         CAN_IT_BUSOFF);
+    if (HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK) {
+        ErrorHandler();
+    }
+    if (HAL_CAN_Start(&hcan) != HAL_OK) {
+        ErrorHandler();
+    }
+    if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) !=
+        HAL_OK) {
+        ErrorHandler();
+    };
+    printf("CAN Started.\n");
 }
 
 uint16_t readAdc(uint32_t channel) { return adcBuffer[channel]; }
+
+void ErrorHandler(void) {
+    __disable_irq();
+    printf("Error\n");
+    while (1) {
+    };
+}
