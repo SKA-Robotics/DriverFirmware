@@ -76,6 +76,12 @@ void roboszponAxisRunningStep(roboszpon_axis_t* axis) {
         roboszpon_message_t message;
         MessageQueue_Dequeue(axis->messageQueue, &message);
         switch (message.id) {
+        case MSG_EMERGENCY_STOP:
+            printf("Emergency stop\n");
+            printf("Disarmed\n");
+            SetMotorDuty(axis->motor, 0.0f);
+            axis->state = ROBOSZPON_AXIS_STATE_STOPPED;
+            return;
         case MSG_MOTOR_COMMAND:
             isThereAMotorCommand = 1;
             latestMotorCommand.id = message.id;

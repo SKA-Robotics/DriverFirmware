@@ -1,7 +1,6 @@
 #ifndef ROBOSZPON_MESSAGE_H
 #define ROBOSZPON_MESSAGE_H
 
-#include "roboszpon_axis.h"
 #include <stdint.h>
 
 #define NODEID_BROADCAST 0x00

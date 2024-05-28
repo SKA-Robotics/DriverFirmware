@@ -1,6 +1,7 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
+#include "firmware_settings.h"
 #include "stm32f1xx_hal.h"
 
 #define MAX_PWM 1023

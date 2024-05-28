@@ -92,14 +92,14 @@ motor_controller_t motorController1 = {
 message_queue_t messageQueue0;
 message_queue_t messageQueue1;
 
-roboszpon_axis_t axis0 = {.nodeId = 0x1,
+roboszpon_axis_t axis0 = {.nodeId = AXIS0_NODEID,
                           .state = ROBOSZPON_AXIS_STATE_STOPPED,
                           .motor = &motor0,
                           .motorController = &motorController0,
                           .messageQueue = &messageQueue0,
                           .errorLedPort = LED_PORT,
                           .errorLedPin = LED_ENC0_PIN};
-roboszpon_axis_t axis1 = {.nodeId = 0x2,
+roboszpon_axis_t axis1 = {.nodeId = AXIS1_NODEID,
                           .state = ROBOSZPON_AXIS_STATE_STOPPED,
                           .motor = &motor1,
                           .motorController = &motorController1,
