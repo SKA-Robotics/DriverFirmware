@@ -103,7 +103,6 @@ void MX_GPIO_Init(void) {
     GPIO_InitStruct.Pin = CAN_RX_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(CAN_PORT, &GPIO_InitStruct);
 
     GPIO_InitStruct.Pin = CAN_TX_PIN;
@@ -258,16 +257,11 @@ void MX_CAN_Init(void) {
     __HAL_RCC_CAN1_CLK_ENABLE();
     hcan.Instance = CAN1;
     hcan.Init.Mode = CAN_MODE_NORMAL;
-    // I am not sure the following configuration is correct. It has to be
-    // tested. I'm trying to configure the can peripheral for 500kbps baudrate.
-    // The CAN controller is clocked at 18 MHz with prescaler 2
-    // (18,000,000 Hz / 2) / 500,000 Hz = 18 time quanta
-    // One time quant is used for start bit, the rest
-    // is distributed among BS1 and BS2.
-    hcan.Init.Prescaler = 24;
-    hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
-    hcan.Init.TimeSeg1 = CAN_BS1_1TQ;
-    hcan.Init.TimeSeg2 = CAN_BS2_1TQ;
+    // 1 Mbit/s
+    hcan.Init.Prescaler = 2;
+    hcan.Init.SyncJumpWidth = CAN_SJW_2TQ;
+    hcan.Init.TimeSeg1 = CAN_BS1_4TQ;
+    hcan.Init.TimeSeg2 = CAN_BS2_4TQ;
     hcan.Init.TimeTriggeredMode = DISABLE;
     hcan.Init.AutoBusOff = DISABLE;
     hcan.Init.AutoWakeUp = DISABLE;
@@ -275,10 +269,25 @@ void MX_CAN_Init(void) {
     hcan.Init.ReceiveFifoLocked = DISABLE;
     hcan.Init.TransmitFifoPriority = DISABLE;
     HAL_CAN_Init(&hcan);
-    HAL_CAN_Start(&hcan);
-    HAL_CAN_ActivateNotification(&hcan, CAN_IT_TX_MAILBOX_EMPTY |
-                                            CAN_IT_RX_FIFO0_MSG_PENDING |
-                                            CAN_IT_BUSOFF);
+
+    CAN_FilterTypeDef sFilterConfig;
+    sFilterConfig.FilterBank = 0;
+    sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+    sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+    sFilterConfig.FilterIdHigh = 0x0000;
+    sFilterConfig.FilterIdLow = 0x0000;
+    sFilterConfig.FilterMaskIdHigh = 0x0000;
+    sFilterConfig.FilterMaskIdLow = 0x0000;
+    sFilterConfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+    sFilterConfig.FilterActivation = ENABLE;
+    sFilterConfig.SlaveStartFilterBank = 14;
+
+    HAL_CAN_ConfigFilter(&hcan, &sFilterConfig);
+
+    (HAL_CAN_Start(&hcan) != HAL_OK);
+    // HAL_CAN_ActivateNotification(&hcan, CAN_IT_TX_MAILBOX_EMPTY |
+    //                                         CAN_IT_RX_FIFO0_MSG_PENDING |
+    //                                         CAN_IT_BUSOFF);
 }
 
 uint16_t readAdc(uint32_t channel) { return adcBuffer[channel]; }
