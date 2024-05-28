@@ -151,32 +151,6 @@ int main() {
     HAL_TIM_Base_Start_IT(&htim4);
 
     while (1) {
-        // CAN_TxHeaderTypeDef TxHeader;
-        // uint8_t TxData[8];
-        // uint32_t TxMailbox;
-
-        // TxHeader.DLC = 8;
-        // TxHeader.IDE = CAN_ID_STD;
-        // TxHeader.RTR = CAN_RTR_DATA;
-        // TxHeader.StdId = 0x001;
-
-        // TxData[0] = 0x21;
-        // TxData[1] = 0x37;
-        // TxData[2] = 0x69;
-        // TxData[3] = 0x21;
-        // TxData[4] = 0x37;
-        // TxData[5] = 0x69;
-        // TxData[6] = 0xAA;
-        // TxData[7] = 0xAA;
-
-        // if (HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox) !=
-        //     HAL_OK) {
-        //     printf("CAN error\n");
-        // } else {
-        //     printf("CAN ok.\n");
-        // }
-
-        // HAL_Delay(5000);
     }
 }
 

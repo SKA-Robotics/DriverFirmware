@@ -1,13 +1,8 @@
 #ifndef ROBOSZPON_MESSAGE_H
 #define ROBOSZPON_MESSAGE_H
 
+#include "roboszpon_axis.h"
 #include <stdint.h>
-
-typedef struct {
-    uint8_t nodeId;
-    uint8_t id;
-    uint64_t data;
-} roboszpon_message_t;
 
 #define NODEID_BROADCAST 0x00
 
@@ -35,7 +30,28 @@ typedef struct {
 #define CTRLSIGNAL_VELOCITY 0x01
 #define CTRLSIGNAL_POSITION 0x02
 
+typedef struct {
+    uint8_t nodeId;
+    uint8_t id;
+    uint64_t data;
+} roboszpon_message_t;
+
 roboszpon_message_t interpretCanMessage(uint32_t frameId, uint8_t dataLength,
                                         uint8_t* data);
+
+typedef struct {
+    uint8_t controlSignalId;
+    float value;
+} message_motor_command_t;
+
+message_motor_command_t
+interpretMotorCommandMessage(roboszpon_message_t* message);
+
+typedef struct {
+    uint8_t actionId;
+} message_action_request_t;
+
+message_action_request_t
+interpretActionRequestMessage(roboszpon_message_t* message);
 
 #endif // ROBOSZPON_MESSAGE_H

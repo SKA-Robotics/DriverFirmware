@@ -6,6 +6,8 @@ void roboszponAxisStoppedStep(roboszpon_axis_t* axis);
 void roboszponAxisRunningStep(roboszpon_axis_t* axis);
 void roboszponAxisErrorStep(roboszpon_axis_t* axis);
 uint8_t roboszponAxisCheckError(roboszpon_axis_t* axis);
+void roboszponAxisApplyMotorCommand(roboszpon_axis_t* axis,
+                                    roboszpon_message_t* command);
 
 void roboszponAxisStep(roboszpon_axis_t* axis) {
     switch (axis->state) {
@@ -80,7 +82,8 @@ void roboszponAxisRunningStep(roboszpon_axis_t* axis) {
             latestMotorCommand.data = message.data;
             break;
         case MSG_ACTION_REQUEST:
-            if (message.data == ACTION_DISARM) {
+            if (interpretActionRequestMessage(&message).actionId ==
+                ACTION_DISARM) {
                 SetMotorDuty(axis->motor, 0.0f);
                 printf("Disarmed\n");
                 axis->state = ROBOSZPON_AXIS_STATE_STOPPED;
@@ -91,10 +94,9 @@ void roboszponAxisRunningStep(roboszpon_axis_t* axis) {
             break;
         }
     }
-    // TODO: Apply the motor command here
     if (isThereAMotorCommand) {
-        printf("Received motor command. Payload: %lld\n",
-               latestMotorCommand.data);
+        printf("Received motor command\n");
+        roboszponAxisApplyMotorCommand(axis, &latestMotorCommand);
     }
 }
 
@@ -106,7 +108,8 @@ void roboszponAxisErrorStep(roboszpon_axis_t* axis) {
         roboszpon_message_t message;
         MessageQueue_Dequeue(axis->messageQueue, &message);
         if (message.id == MSG_ACTION_REQUEST) {
-            if (message.data == ACTION_DISARM) {
+            if (interpretActionRequestMessage(&message).actionId ==
+                ACTION_DISARM) {
                 HAL_GPIO_WritePin(axis->errorLedPort, axis->errorLedPin,
                                   GPIO_PIN_RESET);
                 printf("Disarmed\n");
@@ -129,4 +132,27 @@ uint8_t roboszponAxisCheckError(roboszpon_axis_t* axis) {
         MA730_GetError(axis->motor->encoderCsPort, axis->motor->encoderCsPin);
     // TODO: check for other errors. (Command timeout included)
     return encoderError;
+}
+
+void roboszponAxisApplyMotorCommand(roboszpon_axis_t* axis,
+                                    roboszpon_message_t* command) {
+    message_motor_command_t message = interpretMotorCommandMessage(command);
+    switch (message.controlSignalId) {
+    case CTRLSIGNAL_DUTY:
+        printf("Duty set to %f\n", message.value);
+        motorControllerSetDutySetpoint(axis->motorController, message.value);
+        break;
+    case CTRLSIGNAL_VELOCITY:
+        printf("Velocity set to %f\n", message.value);
+        motorControllerSetDutySetpoint(axis->motorController, message.value);
+        motorControllerSetVelocitySetpoint(axis->motorController,
+                                           message.value);
+        break;
+    case CTRLSIGNAL_POSITION:
+        printf("Position set to %f\n", message.value);
+        motorControllerSetDutySetpoint(axis->motorController, message.value);
+        motorControllerSetPositionSetpoint(axis->motorController,
+                                           message.value);
+        break;
+    }
 }
