@@ -5,11 +5,12 @@
 void roboszponAxisStoppedStep(roboszpon_axis_t* axis);
 void roboszponAxisRunningStep(roboszpon_axis_t* axis);
 void roboszponAxisErrorStep(roboszpon_axis_t* axis);
-uint8_t roboszponAxisCheckError(roboszpon_axis_t* axis);
+uint64_t roboszponAxisCheckError(roboszpon_axis_t* axis);
 void roboszponAxisApplyMotorCommand(roboszpon_axis_t* axis,
                                     roboszpon_message_t* command);
 
 void roboszponAxisStep(roboszpon_axis_t* axis) {
+    axis->flags = roboszponAxisCheckError(axis);
     switch (axis->state) {
     case ROBOSZPON_AXIS_STATE_STOPPED:
         roboszponAxisStoppedStep(axis);
@@ -64,7 +65,7 @@ void roboszponAxisRunningStep(roboszpon_axis_t* axis) {
     // If there was a disarm command, set mode to
     // ROBOSZPON_AXIS_STATE_STOPPED, set motor effort to 0 and break. Else,
     // pass the command to trajectory generator -> motor controller -> motor
-    if (roboszponAxisCheckError(axis) != 0) {
+    if (axis->flags != 0) {
         SetMotorDuty(axis->motor, 0.0f);
         HAL_GPIO_WritePin(axis->errorLedPort, axis->errorLedPin, GPIO_PIN_SET);
         printf("Error detected\n");
@@ -125,7 +126,7 @@ void roboszponAxisErrorStep(roboszpon_axis_t* axis) {
     }
     // If there are no errors, reset error LED, set mode to
     // ROBOSZPON_AXIS_STATE_RUNNING and break.
-    if (roboszponAxisCheckError(axis) == 0) {
+    if (axis->flags == 0) {
         HAL_GPIO_WritePin(axis->errorLedPort, axis->errorLedPin,
                           GPIO_PIN_RESET);
         printf("Error is gone\n");
@@ -133,11 +134,13 @@ void roboszponAxisErrorStep(roboszpon_axis_t* axis) {
     }
 }
 
-uint8_t roboszponAxisCheckError(roboszpon_axis_t* axis) {
+uint64_t roboszponAxisCheckError(roboszpon_axis_t* axis) {
+    uint64_t error;
     uint8_t encoderError =
         MA730_GetError(axis->motor->encoderCsPort, axis->motor->encoderCsPin);
+    error |= encoderError;
     // TODO: check for other errors. (Command timeout included)
-    return encoderError;
+    return error;
 }
 
 void roboszponAxisApplyMotorCommand(roboszpon_axis_t* axis,

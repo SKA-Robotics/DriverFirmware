@@ -13,6 +13,7 @@
 typedef struct {
     uint8_t nodeId; // CAN node ID of the motor axis
     uint8_t state;  // Current state of the axis state machine
+    uint64_t flags; // Axis status flags, sent over CAN. 2 MSB reserved!
     motor_t* motor; // Pointer to the motor corresponding to the axis
     motor_controller_t* motorController; // Pointer to motor controller
     message_queue_t* messageQueue;       // Message queue pointer
