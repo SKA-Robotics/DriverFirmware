@@ -44,3 +44,19 @@ interpretActionRequestMessage(roboszpon_message_t* message) {
     result.actionId = message->data;
     return result;
 }
+
+message_parameter_write_t
+interpretParameterWriteMessage(roboszpon_message_t* message) {
+    message_parameter_write_t result;
+    result.paramId = (message->data >> 56) & 0xff;
+    uint32_t valueBits = (message->data >> 24) & 0xffffffff;
+    result.value = *(float*)&valueBits;
+    return result;
+}
+
+message_parameter_read_t
+interpretParameterReadMessage(roboszpon_message_t* message) {
+    message_parameter_read_t result;
+    result.paramId = message->data;
+    return result;
+}

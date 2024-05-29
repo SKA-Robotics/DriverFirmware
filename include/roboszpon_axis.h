@@ -19,7 +19,7 @@ typedef struct {
     message_queue_t* messageQueue;       // Message queue pointer
     GPIO_TypeDef* errorLedPort;          // GPIO port of the error LED
     uint16_t errorLedPin;                // GPIO pin of the error LED
-    float command_timeout;               // Command timeout (seconds)
+    uint32_t commandTimeout;             // Command timeout (milliseconds)
 } roboszpon_axis_t;
 
 void roboszponAxisStep(roboszpon_axis_t* axis);
