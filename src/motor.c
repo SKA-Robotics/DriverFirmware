@@ -3,6 +3,7 @@
 #include <math.h>
 
 void SetMotorDuty(motor_t* motor, float duty) {
+    motor->state.duty = duty;
     uint32_t pwm = fabs(duty) * 1023;
     if (pwm > MAX_PWM) {
         pwm = MAX_PWM;

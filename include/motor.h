@@ -25,6 +25,7 @@ struct motor_state {
     float position;      // Motor position (radians)
     float velocity;      // Motor speed (radians per second)
     float current; // Motor current (probably milliampers. TODO: calibrate)
+    float duty;    // Motor duty command (-1;1)
 };
 
 // Represents a motor

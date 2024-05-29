@@ -11,6 +11,7 @@ float clampf(float value, float min, float max) {
 void motorControllerStep(motor_controller_t* controller) {
     switch (controller->mode) {
     case MOTOR_CONTROLLER_MODE_DUTY_STPT:
+        UpdateMotorState(controller->motor);
         dutyControl(controller, controller->dutySetpoint);
         break;
     case MOTOR_CONTROLLER_MODE_VELOCITY_STPT:
