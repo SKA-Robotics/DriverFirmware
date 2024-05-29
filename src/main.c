@@ -1,8 +1,10 @@
 #include "math.h"
+#include "message_serialization.h"
 #include "motor.h"
-#include "output.h"
 #include "roboszpon_axis.h"
 #include "system.h"
+
+uint32_t heartbeatPeriod = 500; // Status message period (milliseconds)
 
 motor_t motor0 = {
     .pwmChannelForward = &TIM3->CCR1,
@@ -151,6 +153,17 @@ int main() {
     HAL_TIM_Base_Start_IT(&htim4);
 
     while (1) {
+        HAL_Delay(heartbeatPeriod);
+        sendStatusReportMessage(&axis0);
+        sendStatusReportMessage(&axis1);
+        if (axis0.state == ROBOSZPON_AXIS_STATE_RUNNING) {
+            sendAxisReportMessage(&axis0);
+            sendMotorReportMessage(&axis0);
+        }
+        if (axis1.state == ROBOSZPON_AXIS_STATE_RUNNING) {
+            sendAxisReportMessage(&axis1);
+            sendMotorReportMessage(&axis1);
+        }
     }
 }
 

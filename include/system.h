@@ -6,6 +6,7 @@
 
 #define MAX_PWM 1023
 #define DELTA_TIME 0.01f
+#define CAN_TX_TIMEOUT 100
 
 #define UART_TX_PIN GPIO_PIN_10
 #define UART_RX_PIN GPIO_PIN_11
@@ -74,6 +75,9 @@ void MX_CAN_Init(void);
 volatile static uint16_t adcBuffer[ADC_CHANNELS];
 
 uint16_t readAdc(uint32_t channel);
+
+// returns HAL_OK on success
+int transmitCanFrame(uint16_t frameId, uint64_t data, uint32_t timeout);
 
 void ErrorHandler(void);
 

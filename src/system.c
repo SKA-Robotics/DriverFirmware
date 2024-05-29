@@ -1,4 +1,5 @@
 #include "system.h"
+#include "output.h"
 
 void SystemClock_Config(void) {
     RCC_ClkInitTypeDef RCC_ClkInitStruct = {
@@ -297,10 +298,39 @@ void MX_CAN_Init(void) {
         HAL_OK) {
         ErrorHandler();
     };
-    printf("CAN Started.\n");
 }
 
 uint16_t readAdc(uint32_t channel) { return adcBuffer[channel]; }
+
+CAN_TxHeaderTypeDef TxHeader;
+uint32_t TxMailbox;
+uint8_t TxData[8];
+
+int transmitCanFrame(uint16_t frameId, uint64_t data, uint32_t timeout) {
+    TxHeader.DLC = 8;
+    TxHeader.IDE = CAN_ID_STD;
+    TxHeader.RTR = CAN_RTR_DATA;
+    TxHeader.StdId = frameId;
+    // If you just pass the uint64_t as a uint8_t* to be transmitted, you end up
+    // with least significant byte first.
+    TxData[0] = (data >> 56) & 0xFF;
+    TxData[1] = (data >> 48) & 0xFF;
+    TxData[2] = (data >> 40) & 0xFF;
+    TxData[3] = (data >> 32) & 0xFF;
+    TxData[4] = (data >> 24) & 0xFF;
+    TxData[5] = (data >> 16) & 0xFF;
+    TxData[6] = (data >> 8) & 0xFF;
+    TxData[7] = data & 0xFF;
+    uint32_t startTick = HAL_GetTick();
+    while ((HAL_CAN_GetTxMailboxesFreeLevel(&hcan) == 0) &&
+           ((HAL_GetTick() - startTick) < timeout)) {
+        ; // treat it as a punishment
+    }
+    if (HAL_CAN_GetTxMailboxesFreeLevel(&hcan) == 0) {
+        return HAL_ERROR;
+    }
+    return HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox);
+}
 
 void ErrorHandler(void) {
     __disable_irq();
