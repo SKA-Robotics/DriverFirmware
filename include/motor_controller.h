@@ -1,6 +1,7 @@
 #ifndef MOTOR_CONTROLLER_H
 #define MOTOR_CONTROLLER_H
 
+#include "filter.h"
 #include "motor.h"
 #include "pid.h"
 
@@ -28,6 +29,9 @@ typedef struct {
     pid_controller_t velocityPid;
     pid_controller_t positionPid;
     pid_controller_t currentPid;
+    iir_filter_t currentPidOutputFilter;
+    iir_filter_t velocityPidOutputFilter;
+    iir_filter_t positionPidOutputFilter;
     motor_controller_params_t params;
 } motor_controller_t;
 

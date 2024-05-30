@@ -1,9 +1,7 @@
 #ifndef PID_H
 #define PID_H
 
-typedef struct pid_controller pid_controller_t;
-
-struct pid_controller {
+typedef struct {
     float Kp;
     float Ki;
     float Kd;
@@ -15,7 +13,7 @@ struct pid_controller {
     float prevUi;
     float prevU;
     float antiwindup_correction;
-};
+} pid_controller_t;
 
 float StepPid(pid_controller_t* pid, float e);
 

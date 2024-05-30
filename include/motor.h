@@ -1,6 +1,7 @@
 #ifndef MOTOR_H
 #define MOTOR_H
 
+#include "filter.h"
 #include "system.h"
 #include <stdint.h>
 
@@ -41,7 +42,11 @@ struct motor {
     GPIO_TypeDef* encoderCsPort; // Port of encoder chip select pin
     uint16_t encoderCsPin;       // Encoder chip select pin
     float positionOffset;        // Motor position offset
-    motor_state_t state;         // Current state of the motor
+    iir_filter_t
+        currentMeasurementFilter; // IIR filter applied to measured current
+    iir_filter_t
+        velocityMeasurementFilter; // IIR filter applied to measured velocity
+    motor_state_t state;           // Current state of the motor
 };
 
 void Motor_SetDuty(motor_t* motor, float duty);

@@ -10,7 +10,7 @@ float clampf(float value, float min, float max) {
 
 void DutyControl(motor_controller_t* controller, float setpoint);
 void VelocityControl(motor_controller_t* controller, float setpoint);
-void PositionConrol(motor_controller_t* controller, float setpoint);
+void PositionControl(motor_controller_t* controller, float setpoint);
 
 void MotorController_Step(motor_controller_t* controller) {
     switch (controller->mode) {
@@ -24,7 +24,7 @@ void MotorController_Step(motor_controller_t* controller) {
         break;
     case MOTOR_CONTROLLER_MODE_POSITION_STPT:
         Motor_UpdateState(controller->motor);
-        PositionConrol(controller, controller->positionSetpoint);
+        PositionControl(controller, controller->positionSetpoint);
         break;
     default:
         break;
@@ -61,28 +61,33 @@ void VelocityControl(motor_controller_t* controller, float setpoint) {
     float velocityMeasurement = controller->motor->state.velocity;
     float e = velocitySetpoint - velocityMeasurement;
     float currentSetpoint = StepPid(&controller->velocityPid, e);
+    currentSetpoint =
+        ApplyIirFilter(&controller->velocityPidOutputFilter, currentSetpoint);
     // TODO: feedforward from trajectory generator:
     // currentSetpoint += controller->trajectoryGenerator->acceleration *
     //                    controller->params.accelerationFeedForwardGain;
-    // filter currentSetpoint here
     currentSetpoint = clampf(currentSetpoint, controller->params.minCurrent,
                              controller->params.maxCurrent);
     float currentMeasurement = controller->motor->state.current;
     e = currentSetpoint - currentMeasurement;
     float dutySetpoint = StepPid(&controller->currentPid, e);
+    dutySetpoint =
+        ApplyIirFilter(&controller->currentPidOutputFilter, dutySetpoint);
     DutyControl(controller, dutySetpoint);
+    // TODO: Disable the following line and test:
     DutyControl(controller, currentSetpoint);
 }
 
-void PositionConrol(motor_controller_t* controller, float setpoint) {
+void PositionControl(motor_controller_t* controller, float setpoint) {
     float positionSetpoint = clampf(setpoint, controller->params.minPosition,
                                     controller->params.maxPosition);
     float positionMeasurement = controller->motor->state.position;
     float e = positionSetpoint - positionMeasurement;
     float velocitySetpoint = StepPid(&controller->positionPid, e);
+    velocitySetpoint =
+        ApplyIirFilter(&controller->positionPidOutputFilter, velocitySetpoint);
     // TODO: feedforward from trajectory generator:
     // velocitySetpoint += controller->trajectoryGenerator->velocity *
     //                     controller->params.velocityFeedForwardGain;
-    // filter velocitySetpoint here
     VelocityControl(controller, velocitySetpoint);
 }

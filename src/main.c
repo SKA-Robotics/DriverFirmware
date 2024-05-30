@@ -12,6 +12,8 @@ motor_t motor0 = {
     .encoderCsPort = CS_ENC0DRV0_PORT,
     .encoderCsPin = CS_ENC0_PIN,
     .positionOffset = 0.0f,
+    .currentMeasurementFilter = {.coefficient = 0.9},
+    .velocityMeasurementFilter = {.coefficient = 0.9},
     .state = {0}, // Default initial state
 };
 motor_t motor1 = {
@@ -21,6 +23,8 @@ motor_t motor1 = {
     .encoderCsPort = CS_ENC1DRV1_PORT,
     .encoderCsPin = CS_ENC1_PIN,
     .positionOffset = 0.0f,
+    .currentMeasurementFilter = {.coefficient = 0.9},
+    .velocityMeasurementFilter = {.coefficient = 0.9},
     .state = {0}, // Default initial state
 };
 
@@ -55,7 +59,9 @@ motor_controller_t motorController0 = {
                     .deadzone = 0.01f,
                     .du_max = +INFINITY,
                     .u_max = +INFINITY},
-};
+    .currentPidOutputFilter = {.coefficient = 0.5},
+    .velocityPidOutputFilter = {.coefficient = 0.5},
+    .positionPidOutputFilter = {.coefficient = 0.5}};
 
 motor_controller_t motorController1 = {
     .motor = &motor1,
@@ -88,7 +94,9 @@ motor_controller_t motorController1 = {
                     .deadzone = 0.01f,
                     .du_max = +INFINITY,
                     .u_max = +INFINITY},
-};
+    .currentPidOutputFilter = {.coefficient = 0.5},
+    .velocityPidOutputFilter = {.coefficient = 0.5},
+    .positionPidOutputFilter = {.coefficient = 0.5}};
 
 message_queue_t messageQueue0;
 message_queue_t messageQueue1;

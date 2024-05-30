@@ -40,15 +40,19 @@ void Motor_UpdateState(motor_t* motor) {
         motor->positionOffset +
         (float)motor->state.positionRaw / ENCODER_RESOLUTION;
 
-    motor->state.velocity =
+    float velocityMeasurement =
         (float)deltaPositionRaw / ENCODER_RESOLUTION / DELTA_TIME;
+    motor->state.velocity =
+        ApplyIirFilter(&motor->velocityMeasurementFilter, velocityMeasurement);
 
     uint16_t adc_value = ReadAdc(motor->adcChannel);
     if (adc_value < CURRENT_ADC_DEADZONE) {
         adc_value = 0;
     }
     float scaled_adc_value = CURRENT_MULT * ((float)adc_value) + CURRENT_OFFSET;
-    motor->state.current = (motor->state.direction == FORWARD)
-                               ? scaled_adc_value
-                               : -scaled_adc_value;
+    float currentMeasurement = (motor->state.direction == FORWARD)
+                                   ? scaled_adc_value
+                                   : -scaled_adc_value;
+    motor->state.current =
+        ApplyIirFilter(&motor->currentMeasurementFilter, currentMeasurement);
 }
