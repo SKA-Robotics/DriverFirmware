@@ -235,6 +235,21 @@ void RoboszponNode_WriteParam(roboszpon_node_t* node, uint8_t paramId,
     case PARAM_CPID_dUmax:
         node->motorController->currentPid.du_max = value;
         break;
+    case PARAM_IIR_VALUE_CURMEAS:
+        node->motor->currentMeasurementFilter.coefficient = value;
+        break;
+    case PARAM_IIR_VALUE_VELMEAS:
+        node->motor->velocityMeasurementFilter.coefficient = value;
+        break;
+    case PARAM_IIR_VALUE_PPIDU:
+        node->motorController->positionPidOutputFilter.coefficient = value;
+        break;
+    case PARAM_IIR_VALUE_VPIDU:
+        node->motorController->velocityPidOutputFilter.coefficient = value;
+        break;
+    case PARAM_IIR_VALUE_CPIDU:
+        node->motorController->currentPidOutputFilter.coefficient = value;
+        break;
     case PARAM_MIN_POSITION:
         node->motorController->params.minPosition = value;
         break;
@@ -301,6 +316,16 @@ float RoboszponNode_ReadParam(roboszpon_node_t* node, uint8_t paramId) {
         return node->motorController->velocityPid.u_max;
     case PARAM_VPID_dUmax:
         return node->motorController->velocityPid.du_max;
+    case PARAM_IIR_VALUE_CURMEAS:
+        return node->motor->currentMeasurementFilter.coefficient;
+    case PARAM_IIR_VALUE_VELMEAS:
+        return node->motor->velocityMeasurementFilter.coefficient;
+    case PARAM_IIR_VALUE_PPIDU:
+        return node->motorController->positionPidOutputFilter.coefficient;
+    case PARAM_IIR_VALUE_VPIDU:
+        return node->motorController->velocityPidOutputFilter.coefficient;
+    case PARAM_IIR_VALUE_CPIDU:
+        return node->motorController->currentPidOutputFilter.coefficient;
     case PARAM_CPID_Kp:
         return node->motorController->currentPid.Kp;
     case PARAM_CPID_Ki:
