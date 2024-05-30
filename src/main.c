@@ -1,11 +1,8 @@
 #include "math.h"
 #include "message_serialization.h"
 #include "motor.h"
-#include "roboszpon_axis.h"
+#include "roboszpon_node.h"
 #include "system.h"
-
-uint32_t heartbeatPeriod =
-    STATUS_REPORT_MESSAGE_PERIOD; // Status message period (milliseconds)
 
 motor_t motor0 = {
     .pwmChannelForward = &TIM3->CCR1,
@@ -95,15 +92,15 @@ motor_controller_t motorController1 = {
 message_queue_t messageQueue0;
 message_queue_t messageQueue1;
 
-roboszpon_axis_t axis0 = {.nodeId = AXIS0_NODEID,
-                          .state = ROBOSZPON_AXIS_STATE_STOPPED,
+roboszpon_node_t node0 = {.nodeId = MOTOR0_NODEID,
+                          .state = ROBOSZPON_NODE_STATE_STOPPED,
                           .motor = &motor0,
                           .motorController = &motorController0,
                           .messageQueue = &messageQueue0,
                           .errorLedPort = LED_PORT,
                           .errorLedPin = LED_ENC0_PIN};
-roboszpon_axis_t axis1 = {.nodeId = AXIS1_NODEID,
-                          .state = ROBOSZPON_AXIS_STATE_STOPPED,
+roboszpon_node_t node1 = {.nodeId = MOTOR1_NODEID,
+                          .state = ROBOSZPON_NODE_STATE_STOPPED,
                           .motor = &motor1,
                           .motorController = &motorController1,
                           .messageQueue = &messageQueue1,
@@ -111,16 +108,16 @@ roboszpon_axis_t axis1 = {.nodeId = AXIS1_NODEID,
                           .errorLedPin = LED_ENC1_PIN};
 
 void MainLoop() {
-    roboszponAxisStep(&axis0);
-    roboszponAxisStep(&axis1);
+    RoboszponNode_Step(&node0);
+    RoboszponNode_Step(&node1);
 }
 
 void MotorControlLoop() {
-    if (axis0.state == ROBOSZPON_AXIS_STATE_RUNNING) {
-        motorControllerStep(axis0.motorController);
+    if (node0.state == ROBOSZPON_NODE_STATE_RUNNING) {
+        motorControllerStep(node0.motorController);
     }
-    if (axis1.state == ROBOSZPON_AXIS_STATE_RUNNING) {
-        motorControllerStep(axis1.motorController);
+    if (node1.state == ROBOSZPON_NODE_STATE_RUNNING) {
+        motorControllerStep(node1.motorController);
     }
 }
 
@@ -154,17 +151,6 @@ int main() {
     HAL_TIM_Base_Start_IT(&htim4);
 
     while (1) {
-        HAL_Delay(heartbeatPeriod);
-        sendStatusReportMessage(&axis0);
-        sendStatusReportMessage(&axis1);
-        if (axis0.state == ROBOSZPON_AXIS_STATE_RUNNING) {
-            sendAxisReportMessage(&axis0);
-            sendMotorReportMessage(&axis0);
-        }
-        if (axis1.state == ROBOSZPON_AXIS_STATE_RUNNING) {
-            sendAxisReportMessage(&axis1);
-            sendMotorReportMessage(&axis1);
-        }
     }
 }
 
@@ -189,12 +175,12 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
     roboszpon_message_t message =
         interpretCanMessage(RxHeader.StdId, RxHeader.DLC, RxData);
-    if (message.nodeId == axis0.nodeId) {
-        MessageQueue_Enqueue(axis0.messageQueue, message);
-    } else if (message.nodeId == axis1.nodeId) {
-        MessageQueue_Enqueue(axis1.messageQueue, message);
+    if (message.nodeId == node0.nodeId) {
+        MessageQueue_Enqueue(node0.messageQueue, message);
+    } else if (message.nodeId == node1.nodeId) {
+        MessageQueue_Enqueue(node1.messageQueue, message);
     } else if (message.nodeId == NODEID_BROADCAST) {
-        MessageQueue_Enqueue(axis0.messageQueue, message);
-        MessageQueue_Enqueue(axis1.messageQueue, message);
+        MessageQueue_Enqueue(node0.messageQueue, message);
+        MessageQueue_Enqueue(node1.messageQueue, message);
     }
 }

@@ -1,8 +1,8 @@
 #ifndef MESSAGE_SERIALIZATION_H
 #define MESSAGE_SERIALIZATION_H
 
-#include "roboszpon_axis.h"
 #include "roboszpon_message.h"
+#include "roboszpon_node.h"
 
 void sendStatusReportMessage(roboszpon_axis_t* axis);
 
