@@ -77,7 +77,7 @@ volatile static uint16_t adcBuffer[ADC_CHANNELS];
 uint16_t readAdc(uint32_t channel);
 
 // returns HAL_OK on success
-int transmitCanFrame(uint16_t frameId, uint64_t data, uint32_t timeout);
+int transmitCanFrame(uint16_t arbitrationId, uint64_t data, uint32_t timeout);
 
 void ErrorHandler(void);
 

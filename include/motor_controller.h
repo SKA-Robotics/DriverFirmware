@@ -31,15 +31,12 @@ typedef struct {
     motor_controller_params_t params;
 } motor_controller_t;
 
-void motorControllerStep(motor_controller_t* controller);
-void motorControllerSetDutySetpoint(motor_controller_t* controller,
-                                    float setpoint);
-void motorControllerSetVelocitySetpoint(motor_controller_t* controller,
-                                        float setpoint);
-void motorControllerSetPositionSetpoint(motor_controller_t* controller,
-                                        float setpoint);
-void dutyControl(motor_controller_t* controller, float setpoint);
-void velocityControl(motor_controller_t* controller, float setpoint);
-void positionControl(motor_controller_t* controller, float setpoint);
+void MotorController_Step(motor_controller_t* controller);
+void MotorController_SetDutySetpoint(motor_controller_t* controller,
+                                     float setpoint);
+void MotorController_SetVelocitySetpoint(motor_controller_t* controller,
+                                         float setpoint);
+void MotorController_SetPositionSetpoint(motor_controller_t* controller,
+                                         float setpoint);
 
 #endif // MOTOR_CONTROLLER_H

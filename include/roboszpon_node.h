@@ -6,6 +6,7 @@
 #include <motor_controller.h>
 #include <stdint.h>
 
+#define ROBOSZPON_NO_ERROR 0
 #define ROBOSZPON_ERROR_CMDTIMEOUT 1 << 9
 
 #define ROBOSZPON_NODE_STATE_STOPPED 0x00

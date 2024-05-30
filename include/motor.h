@@ -44,7 +44,7 @@ struct motor {
     motor_state_t state;         // Current state of the motor
 };
 
-void SetMotorDuty(motor_t* motor, float duty);
-void UpdateMotorState(motor_t* motor);
+void Motor_SetDuty(motor_t* motor, float duty);
+void Motor_UpdateState(motor_t* motor);
 
 #endif // MOTOR_H

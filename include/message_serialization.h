@@ -4,12 +4,13 @@
 #include "roboszpon_message.h"
 #include "roboszpon_node.h"
 
-void sendStatusReportMessage(roboszpon_axis_t* axis);
+void SendMessage_StatusReport(roboszpon_node_t* node);
 
-void sendAxisReportMessage(roboszpon_axis_t* axis);
+void SendMessage_AxisReport(roboszpon_node_t* node);
 
-void sendMotorReportMessage(roboszpon_axis_t* axis);
+void SendMessage_MotorReport(roboszpon_node_t* node);
 
-void sendParameterResponseMessage(uint8_t nodeId, uint8_t paramId, float value);
+void SendMessage_ParameterResponse(uint8_t nodeId, uint8_t paramId,
+                                   float value);
 
 #endif // MESSAGE_SERIALIZATION_H

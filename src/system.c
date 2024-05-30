@@ -306,11 +306,11 @@ CAN_TxHeaderTypeDef TxHeader;
 uint32_t TxMailbox;
 uint8_t TxData[8];
 
-int transmitCanFrame(uint16_t frameId, uint64_t data, uint32_t timeout) {
+int transmitCanFrame(uint16_t arbitrationId, uint64_t data, uint32_t timeout) {
     TxHeader.DLC = 8;
     TxHeader.IDE = CAN_ID_STD;
     TxHeader.RTR = CAN_RTR_DATA;
-    TxHeader.StdId = frameId;
+    TxHeader.StdId = arbitrationId;
     // If you just pass the uint64_t as a uint8_t* to be transmitted, you end up
     // with least significant byte first.
     TxData[0] = (data >> 56) & 0xFF;

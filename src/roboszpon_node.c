@@ -1,12 +1,13 @@
+#include "roboszpon_node.h"
 #include "mag_alpha_driver.h"
 #include "message_serialization.h"
 #include "roboszpon_message.h"
-#include "roboszpon_node.h"
 
+uint64_t RoboszponNode_CheckError(roboszpon_node_t* node);
 void RoboszponNode_StoppedStep(roboszpon_node_t* node);
 void RoboszponNode_RunningStep(roboszpon_node_t* node);
 void RoboszponNode_ErrorStep(roboszpon_node_t* node);
-uint64_t RoboszponNode_CheckError(roboszpon_node_t* node);
+void RoboszponNode_Disarm(roboszpon_node_t* node);
 void RoboszponNode_ApplyMotorCommand(roboszpon_node_t* node,
                                      roboszpon_message_t* command);
 void RoboszponNode_WriteParam(roboszpon_node_t* node, uint8_t paramId,
@@ -15,44 +16,49 @@ float RoboszponNode_ReadParam(roboszpon_node_t* node, uint8_t paramId);
 
 void RoboszponNode_Step(roboszpon_node_t* node) {
     node->flags = RoboszponNode_CheckError(node);
-    sendStatusReportMessage(node);
+    SendMessage_StatusReport(node);
     switch (node->state) {
     case ROBOSZPON_NODE_STATE_STOPPED:
         RoboszponNode_StoppedStep(node);
         return;
     case ROBOSZPON_NODE_STATE_RUNNING:
-        sendnodeReportMessage(node);
-        sendMotorReportMessage(node);
+        SendMessage_AxisReport(node);
+        SendMessage_MotorReport(node);
         RoboszponNode_RunningStep(node);
         return;
     case ROBOSZPON_NODE_STATE_ERROR:
         RoboszponNode_ErrorStep(node);
         return;
     default:
-        // What are you even doing here?
         return;
     }
 }
 
+uint64_t RoboszponNode_CheckError(roboszpon_node_t* node) {
+    uint64_t error = 0;
+    uint8_t encoderError =
+        MA730_GetError(node->motor->encoderCsPort, node->motor->encoderCsPin);
+    error |= encoderError;
+    // TODO: check for other errors. (Command timeout included)
+    return error;
+}
+
 void RoboszponNode_StoppedStep(roboszpon_node_t* node) {
-    // Check message queue, apply configuration messages, delete run
-    // mode messages If ARM command is received, set mode to
-    // ROBOSZPON_NODE_STATE_RUNNING
+    roboszpon_message_t message;
     while (!MessageQueue_IsEmpty(node->messageQueue)) {
-        roboszpon_message_t message;
         MessageQueue_Dequeue(node->messageQueue, &message);
         switch (message.id) {
-        case MSG_PARAMETER_WRITE:
+        case MSG_PARAMETER_WRITE: {
             message_parameter_write_t param =
-                interpretParameterWriteMessage(&message);
+                ParseMessage_ParameterWrite(&message);
             RoboszponNode_WriteParam(node, param.paramId, param.value);
-            break;
-        case MSG_PARAMETER_READ:
+        } break;
+        case MSG_PARAMETER_READ: {
             message_parameter_read_t request =
-                interpretParameterReadMessage(&message);
+                ParseMessage_ParameterRead(&message);
             float value = RoboszponNode_ReadParam(node, request.paramId);
-            sendParameterResponseMessage(node->nodeId, request.paramId, value);
-            break;
+            SendMessage_ParameterResponse(node->nodeId, request.paramId, value);
+        } break;
         case MSG_ACTION_REQUEST:
             if (message.data == ACTION_ARM) {
                 node->state = ROBOSZPON_NODE_STATE_RUNNING;
@@ -60,34 +66,26 @@ void RoboszponNode_StoppedStep(roboszpon_node_t* node) {
             // TODO: implement all the other actions
             break;
         default:
+            // Ignore all the other messages
             break;
         }
     }
 }
 
 void RoboszponNode_RunningStep(roboszpon_node_t* node) {
-    // Check for errors. If there is an error, set motor effort to 0, set
-    // error LED on, break and set mode to ROBOSZPON_NODE_STATE_ERROR
-    // Get latest node command from message queue, delete other messages
-    // If there was a disarm command, set mode to
-    // ROBOSZPON_NODE_STATE_STOPPED, set motor effort to 0 and break. Else,
-    // pass the command to trajectory generator -> motor controller -> motor
-    if (node->flags != 0) {
-        SetMotorDuty(node->motor, 0.0f);
+    if (node->flags != ROBOSZPON_NO_ERROR) { // Error detected
+        Motor_SetDuty(node->motor, 0.0f);
         HAL_GPIO_WritePin(node->errorLedPort, node->errorLedPin, GPIO_PIN_SET);
         node->state = ROBOSZPON_NODE_STATE_ERROR;
     }
     int isThereAMotorCommand = 0;
+    roboszpon_message_t message;
     roboszpon_message_t latestMotorCommand;
     while (!MessageQueue_IsEmpty(node->messageQueue)) {
-        roboszpon_message_t message;
         MessageQueue_Dequeue(node->messageQueue, &message);
         switch (message.id) {
         case MSG_EMERGENCY_STOP:
-            motorControllerSetPositionSetpoint(node->motorController, 0.0f);
-            motorControllerSetVelocitySetpoint(node->motorController, 0.0f);
-            motorControllerSetDutySetpoint(node->motorController, 0.0f);
-            SetMotorDuty(node->motor, 0.0f);
+            RoboszponNode_Disarm(node);
             node->state = ROBOSZPON_NODE_STATE_STOPPED;
             return;
         case MSG_MOTOR_COMMAND:
@@ -96,9 +94,9 @@ void RoboszponNode_RunningStep(roboszpon_node_t* node) {
             latestMotorCommand.data = message.data;
             break;
         case MSG_ACTION_REQUEST:
-            if (interpretActionRequestMessage(&message).actionId ==
+            if (ParseMessage_ActionRequest(&message).actionId ==
                 ACTION_DISARM) {
-                SetMotorDuty(node->motor, 0.0f);
+                RoboszponNode_Disarm(node);
                 node->state = ROBOSZPON_NODE_STATE_STOPPED;
                 return;
             }
@@ -113,14 +111,11 @@ void RoboszponNode_RunningStep(roboszpon_node_t* node) {
 }
 
 void RoboszponNode_ErrorStep(roboszpon_node_t* node) {
-    // Delete all messages from message queue. If there is a disarm command,
-    // set mode to DISARM, reset error LED and break. else, check for
-    // errors.
+    roboszpon_message_t message;
     while (!MessageQueue_IsEmpty(node->messageQueue)) {
-        roboszpon_message_t message;
         MessageQueue_Dequeue(node->messageQueue, &message);
         if (message.id == MSG_ACTION_REQUEST) {
-            if (interpretActionRequestMessage(&message).actionId ==
+            if (ParseMessage_ActionRequest(&message).actionId ==
                 ACTION_DISARM) {
                 HAL_GPIO_WritePin(node->errorLedPort, node->errorLedPin,
                                   GPIO_PIN_RESET);
@@ -128,40 +123,36 @@ void RoboszponNode_ErrorStep(roboszpon_node_t* node) {
             }
         }
     }
-    // If there are no errors, reset error LED, set mode to
-    // ROBOSZPON_NODE_STATE_RUNNING and break.
-    if (node->flags == 0) {
+    if (node->flags == ROBOSZPON_NO_ERROR) { // All errors resolved
         HAL_GPIO_WritePin(node->errorLedPort, node->errorLedPin,
                           GPIO_PIN_RESET);
         node->state = ROBOSZPON_NODE_STATE_RUNNING;
     }
 }
 
-uint64_t RoboszponNode_CheckError(roboszpon_node_t* node) {
-    uint64_t error = 0;
-    uint8_t encoderError =
-        MA730_GetError(node->motor->encoderCsPort, node->motor->encoderCsPin);
-    error |= encoderError;
-    // TODO: check for other errors. (Command timeout included)
-    return error;
+void RoboszponNode_Disarm(roboszpon_node_t* node) {
+    MotorController_SetPositionSetpoint(node->motorController, 0.0f);
+    MotorController_SetVelocitySetpoint(node->motorController, 0.0f);
+    MotorController_SetDutySetpoint(node->motorController, 0.0f);
+    Motor_SetDuty(node->motor, 0.0f);
 }
 
 void RoboszponNode_ApplyMotorCommand(roboszpon_node_t* node,
                                      roboszpon_message_t* command) {
-    message_motor_command_t message = interpretMotorCommandMessage(command);
+    message_motor_command_t message = ParseMessage_MotorCommand(command);
     switch (message.controlSignalId) {
     case CTRLSIGNAL_DUTY:
-        motorControllerSetDutySetpoint(node->motorController, message.value);
+        MotorController_SetDutySetpoint(node->motorController, message.value);
         break;
     case CTRLSIGNAL_VELOCITY:
-        motorControllerSetDutySetpoint(node->motorController, message.value);
-        motorControllerSetVelocitySetpoint(node->motorController,
-                                           message.value);
+        MotorController_SetDutySetpoint(node->motorController, message.value);
+        MotorController_SetVelocitySetpoint(node->motorController,
+                                            message.value);
         break;
     case CTRLSIGNAL_POSITION:
-        motorControllerSetDutySetpoint(node->motorController, message.value);
-        motorControllerSetPositionSetpoint(node->motorController,
-                                           message.value);
+        MotorController_SetDutySetpoint(node->motorController, message.value);
+        MotorController_SetPositionSetpoint(node->motorController,
+                                            message.value);
         break;
     }
 }

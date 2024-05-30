@@ -2,7 +2,7 @@
 #include "mag_alpha_driver.h"
 #include <math.h>
 
-void SetMotorDuty(motor_t* motor, float duty) {
+void Motor_SetDuty(motor_t* motor, float duty) {
     motor->state.duty = duty;
     uint32_t pwm = fabs(duty) * 1023;
     if (pwm > MAX_PWM) {
@@ -19,7 +19,7 @@ void SetMotorDuty(motor_t* motor, float duty) {
     }
 }
 
-void UpdateMotorState(motor_t* motor) {
+void Motor_UpdateState(motor_t* motor) {
     uint16_t positionMeasurement =
         MA730_ReadAngle(motor->encoderCsPort, motor->encoderCsPin);
     long deltaPositionRaw =

@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #define NODEID_BROADCAST 0x00
+#define EMERGENCY_STOP_ARBITRATION_ID 0x001
 
 #define MSG_EMERGENCY_STOP 0x00
 #define MSG_MOTOR_COMMAND 0x01
@@ -70,23 +71,22 @@ typedef struct {
     uint64_t data;
 } roboszpon_message_t;
 
-roboszpon_message_t interpretCanMessage(uint32_t frameId, uint8_t dataLength,
-                                        uint8_t* data);
+roboszpon_message_t DecodeCanMessage(uint32_t arbitrationId, uint8_t dataLength,
+                                     uint8_t* data);
 
 typedef struct {
     uint8_t controlSignalId;
     float value;
 } message_motor_command_t;
 
-message_motor_command_t
-interpretMotorCommandMessage(roboszpon_message_t* message);
+message_motor_command_t ParseMessage_MotorCommand(roboszpon_message_t* message);
 
 typedef struct {
     uint8_t actionId;
 } message_action_request_t;
 
 message_action_request_t
-interpretActionRequestMessage(roboszpon_message_t* message);
+ParseMessage_ActionRequest(roboszpon_message_t* message);
 
 typedef struct {
     uint8_t paramId;
@@ -94,7 +94,7 @@ typedef struct {
 } message_parameter_write_t;
 
 message_parameter_write_t
-interpretParameterWriteMessage(roboszpon_message_t* message);
+ParseMessage_ParameterWrite(roboszpon_message_t* message);
 
 typedef struct {
     uint8_t paramId;
@@ -102,6 +102,6 @@ typedef struct {
 } message_parameter_read_t;
 
 message_parameter_read_t
-interpretParameterReadMessage(roboszpon_message_t* message);
+ParseMessage_ParameterRead(roboszpon_message_t* message);
 
 #endif // ROBOSZPON_MESSAGE_H

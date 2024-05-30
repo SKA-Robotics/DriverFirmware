@@ -114,10 +114,10 @@ void MainLoop() {
 
 void MotorControlLoop() {
     if (node0.state == ROBOSZPON_NODE_STATE_RUNNING) {
-        motorControllerStep(node0.motorController);
+        MotorController_Step(node0.motorController);
     }
     if (node1.state == ROBOSZPON_NODE_STATE_RUNNING) {
-        motorControllerStep(node1.motorController);
+        MotorController_Step(node1.motorController);
     }
 }
 
@@ -174,7 +174,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
     uint8_t RxData[8];
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
     roboszpon_message_t message =
-        interpretCanMessage(RxHeader.StdId, RxHeader.DLC, RxData);
+        DecodeCanMessage(RxHeader.StdId, RxHeader.DLC, RxData);
     if (message.nodeId == node0.nodeId) {
         MessageQueue_Enqueue(node0.messageQueue, message);
     } else if (message.nodeId == node1.nodeId) {
