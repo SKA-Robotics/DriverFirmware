@@ -10,7 +10,7 @@ void SendMessage_StatusReport(roboszpon_node_t* node) {
         0x3FFFFFFFFFFFFFFF; // Make sure two most significant bits are free
     uint8_t mode = node->state;
     uint64_t data = ((uint64_t)mode) << 62 | flags;
-    if (transmitCanFrame(frameId, data, CAN_TX_TIMEOUT) != HAL_OK) {
+    if (TransmitCanFrame(frameId, data, CAN_TX_TIMEOUT) != HAL_OK) {
         printf("CAN error\n"); // TODO: Create can error handler.
     }
 }
@@ -20,7 +20,7 @@ void SendMessage_AxisReport(roboszpon_node_t* node) {
     uint32_t position = *(uint32_t*)&node->motor->state.position;
     uint32_t velocity = *(uint32_t*)&node->motor->state.velocity;
     uint64_t data = (uint64_t)position << 32 | velocity;
-    if (transmitCanFrame(frameId, data, CAN_TX_TIMEOUT) != HAL_OK) {
+    if (TransmitCanFrame(frameId, data, CAN_TX_TIMEOUT) != HAL_OK) {
         printf("CAN error\n");
     }
 }
@@ -30,7 +30,7 @@ void SendMessage_MotorReport(roboszpon_node_t* node) {
     uint32_t current = *(uint32_t*)&node->motor->state.current;
     uint32_t duty = *(uint32_t*)&node->motor->state.duty;
     uint64_t data = (uint64_t)current << 32 | duty;
-    if (transmitCanFrame(frameId, data, CAN_TX_TIMEOUT) != HAL_OK) {
+    if (TransmitCanFrame(frameId, data, CAN_TX_TIMEOUT) != HAL_OK) {
         printf("CAN error\n");
     }
 }
@@ -40,7 +40,7 @@ void SendMessage_ParameterResponse(uint8_t nodeId, uint8_t paramId,
     uint16_t frameId = BuildFrameId(nodeId, MSG_PARAMETER_RESPONSE);
     uint32_t valueBits = *(uint32_t*)&value;
     uint64_t data = ((uint64_t)paramId << 56) | ((uint64_t)valueBits << 24);
-    if (transmitCanFrame(frameId, data, CAN_TX_TIMEOUT) != HAL_OK) {
+    if (TransmitCanFrame(frameId, data, CAN_TX_TIMEOUT) != HAL_OK) {
         printf("CAN error\n");
     }
 }

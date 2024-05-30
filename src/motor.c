@@ -1,5 +1,5 @@
 #include "motor.h"
-#include "mag_alpha_driver.h"
+#include "ma730_driver.h"
 #include <math.h>
 
 void Motor_SetDuty(motor_t* motor, float duty) {
@@ -43,7 +43,7 @@ void Motor_UpdateState(motor_t* motor) {
     motor->state.velocity =
         (float)deltaPositionRaw / ENCODER_RESOLUTION / DELTA_TIME;
 
-    uint16_t adc_value = readAdc(motor->adcChannel);
+    uint16_t adc_value = ReadAdc(motor->adcChannel);
     if (adc_value < CURRENT_ADC_DEADZONE) {
         adc_value = 0;
     }

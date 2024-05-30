@@ -167,7 +167,7 @@ void MX_PWM_Init(void) {
     __HAL_RCC_TIM3_CLK_ENABLE();
     htim3.Instance = TIM3;
     htim3.Init.Period = MAX_PWM;
-    htim3.Init.Prescaler = 1;
+    htim3.Init.Prescaler = 1; // Tick every 1/36 microsecond (used for us delay)
     htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -300,13 +300,27 @@ void MX_CAN_Init(void) {
     };
 }
 
-uint16_t readAdc(uint32_t channel) { return adcBuffer[channel]; }
+void DelayMicroseconds(uint16_t us) {
+    uint32_t start =
+        __HAL_TIM_GET_COUNTER(&htim1); // Capture the starting counter value
+    uint32_t target =
+        36 * (uint32_t)us; // The target delay in microseconds (timer ticks
+                           // 36 times per microsecond)
+    while ((__HAL_TIM_GET_COUNTER(&htim1) - start) < target) {
+        // Handle timer overflow
+        if (__HAL_TIM_GET_COUNTER(&htim1) < start) {
+            start -= __HAL_TIM_GET_AUTORELOAD(&htim1) + 1;
+        }
+    }
+}
+
+uint16_t ReadAdc(uint32_t channel) { return adcBuffer[channel]; }
 
 CAN_TxHeaderTypeDef TxHeader;
 uint32_t TxMailbox;
 uint8_t TxData[8];
 
-int transmitCanFrame(uint16_t arbitrationId, uint64_t data, uint32_t timeout) {
+int TransmitCanFrame(uint16_t arbitrationId, uint64_t data, uint32_t timeout) {
     TxHeader.DLC = 8;
     TxHeader.IDE = CAN_ID_STD;
     TxHeader.RTR = CAN_RTR_DATA;

@@ -1,5 +1,5 @@
-#ifndef MAG_ALPHA_DRIVER
-#define MAG_ALPHA_DRIVER
+#ifndef MA730_DRIVER
+#define MA730_DRIVER
 
 #include "system.h"
 
@@ -18,4 +18,4 @@ void MA730_WriteRegister(GPIO_TypeDef* csPort, uint16_t csPin,
 
 uint8_t MA730_GetError(GPIO_TypeDef* csPort, uint16_t csPin);
 
-#endif // MAG_ALPHA_DRIVER
+#endif // MA730_DRIVER

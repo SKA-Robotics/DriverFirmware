@@ -1,5 +1,5 @@
 #include "roboszpon_node.h"
-#include "mag_alpha_driver.h"
+#include "ma730_driver.h"
 #include "message_serialization.h"
 #include "roboszpon_message.h"
 

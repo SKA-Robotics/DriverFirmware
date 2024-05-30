@@ -151,6 +151,8 @@ int main() {
     HAL_TIM_Base_Start_IT(&htim4);
 
     while (1) {
+        HAL_Delay(1000);
+        HAL_GPIO_TogglePin(LED_PORT, LED_CAN_PIN);
     }
 }
 

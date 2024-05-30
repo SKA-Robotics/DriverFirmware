@@ -74,10 +74,12 @@ void MX_CAN_Init(void);
 
 volatile static uint16_t adcBuffer[ADC_CHANNELS];
 
-uint16_t readAdc(uint32_t channel);
+void DelayMicroseconds(uint16_t us);
+
+uint16_t ReadAdc(uint32_t channel);
 
 // returns HAL_OK on success
-int transmitCanFrame(uint16_t arbitrationId, uint64_t data, uint32_t timeout);
+int TransmitCanFrame(uint16_t arbitrationId, uint64_t data, uint32_t timeout);
 
 void ErrorHandler(void);
 

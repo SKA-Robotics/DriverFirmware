@@ -1,4 +1,4 @@
-#include "mag_alpha_driver.h"
+#include "ma730_driver.h"
 
 uint16_t MA730_ReadAngle(GPIO_TypeDef* csPort, uint16_t csPin) {
     uint8_t txData[2] = {0};
@@ -20,12 +20,11 @@ uint16_t MA730_ReadRegister(GPIO_TypeDef* csPort, uint16_t csPin,
     HAL_GPIO_WritePin(csPort, csPin, GPIO_PIN_SET);
     txData[0] = 0x00;
     txData[1] = 0x00;
-    HAL_Delay(1); // TODO: This should be much shorter (but at least 0.75
-                  // microsecond). Utilize additional timer to make it so.
+    DelayMicroseconds(1);
     HAL_GPIO_WritePin(csPort, csPin, GPIO_PIN_RESET);
     HAL_SPI_TransmitReceive(&hspi1, txData, rxData, 2, 10);
     HAL_GPIO_WritePin(csPort, csPin, GPIO_PIN_SET);
-    HAL_Delay(1); // TODO: Same as above
+    DelayMicroseconds(1);
     return rxData[1] << 8 | rxData[0];
 }
 
@@ -52,9 +51,7 @@ void MA730_WriteRegister(GPIO_TypeDef* csPort, uint16_t csPin,
 uint8_t MA730_GetError(GPIO_TypeDef* csPort, uint16_t csPin) {
     uint16_t flags = MA730_ReadRegister(csPort, csPin, 0x1b);
     // Check for disconnected device
-    // The device should return 0x00 as a second byte when responding to a read
-    // command. If the response is 0xffff, there must be no device on the other
-    // end of the wire: report an error.
+    // This method is not 100% correct. TODO: find a better one
     if (flags == 0xffff) {
         return MA730_Error_Disconnected;
     }
