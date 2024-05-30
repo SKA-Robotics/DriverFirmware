@@ -83,4 +83,7 @@ int TransmitCanFrame(uint16_t arbitrationId, uint64_t data, uint32_t timeout);
 
 void ErrorHandler(void);
 
+void CanErrorHandler(void);
+void CanSuccessHandler(void);
+
 #endif // SYSTEM_H

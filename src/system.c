@@ -352,3 +352,11 @@ void ErrorHandler(void) {
     while (1) {
     };
 }
+
+void CanErrorHandler(void) {
+    HAL_GPIO_WritePin(LED_PORT, LED_CAN_PIN, GPIO_PIN_RESET);
+}
+
+void CanSuccessHandler(void) {
+    HAL_GPIO_WritePin(LED_PORT, LED_CAN_PIN, GPIO_PIN_SET);
+}
