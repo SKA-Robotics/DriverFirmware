@@ -4,7 +4,8 @@
 #include "roboszpon_axis.h"
 #include "system.h"
 
-uint32_t heartbeatPeriod = 500; // Status message period (milliseconds)
+uint32_t heartbeatPeriod =
+    STATUS_REPORT_MESSAGE_PERIOD; // Status message period (milliseconds)
 
 motor_t motor0 = {
     .pwmChannelForward = &TIM3->CCR1,
