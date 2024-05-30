@@ -2,6 +2,7 @@
 #include "ma730_driver.h"
 #include "message_serialization.h"
 #include "roboszpon_message.h"
+#include <math.h>
 
 uint64_t RoboszponNode_CheckError(roboszpon_node_t* node);
 void RoboszponNode_StoppedStep(roboszpon_node_t* node);
@@ -15,7 +16,7 @@ void RoboszponNode_WriteParam(roboszpon_node_t* node, uint8_t paramId,
 float RoboszponNode_ReadParam(roboszpon_node_t* node, uint8_t paramId);
 
 void RoboszponNode_Step(roboszpon_node_t* node) {
-    node->flags = RoboszponNode_CheckError(node);
+    // node->flags = RoboszponNode_CheckError(node);
     SendMessage_StatusReport(node);
     switch (node->state) {
     case ROBOSZPON_NODE_STATE_STOPPED:
@@ -163,8 +164,10 @@ void RoboszponNode_WriteParam(roboszpon_node_t* node, uint8_t paramId,
     case PARAM_COMMAND_TIMEOUT:
         node->commandTimeout = (uint32_t)(value * 1000.0f);
         break;
-    case PARAM_ENCODER_OFFSET:
-        // TODO: implement encoder offset
+    case PARAM_ENCODER_ZERO:
+        value = fmod(value, 1.0f);
+        MA730_SetZero(node->motor->encoderCsPort, node->motor->encoderCsPin,
+                      value);
         break;
     case PARAM_PPID_Kp:
         node->motorController->positionPid.Kp = value;
@@ -262,9 +265,9 @@ float RoboszponNode_ReadParam(roboszpon_node_t* node, uint8_t paramId) {
     switch (paramId) {
     case PARAM_COMMAND_TIMEOUT:
         return ((float)node->commandTimeout) / 1000.0f;
-    case PARAM_ENCODER_OFFSET:
-        // TODO: implement encoder offset
-        return 0.0;
+    case PARAM_ENCODER_ZERO:
+        return MA730_GetZero(node->motor->encoderCsPort,
+                             node->motor->encoderCsPin);
     case PARAM_PPID_Kp:
         return node->motorController->positionPid.Kp;
     case PARAM_PPID_Ki:

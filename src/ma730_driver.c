@@ -1,4 +1,5 @@
 #include "ma730_driver.h"
+#include "system.h"
 
 uint16_t MA730_ReadAngle(GPIO_TypeDef* csPort, uint16_t csPin) {
     uint8_t txData[2] = {0};
@@ -46,6 +47,7 @@ void MA730_WriteRegister(GPIO_TypeDef* csPort, uint16_t csPin,
     HAL_GPIO_WritePin(csPort, csPin, GPIO_PIN_RESET);
     HAL_SPI_TransmitReceive(&hspi1, txData, rxData, 2, 10);
     HAL_GPIO_WritePin(csPort, csPin, GPIO_PIN_SET);
+    DelayMicroseconds(1);
 }
 
 uint8_t MA730_GetError(GPIO_TypeDef* csPort, uint16_t csPin) {
@@ -65,4 +67,21 @@ uint8_t MA730_GetError(GPIO_TypeDef* csPort, uint16_t csPin) {
     flags |= mgl << 6;
     flags &= 0b11000000;
     return flags;
+}
+
+float MA730_GetZero(GPIO_TypeDef* csPort, uint16_t csPin) {
+    uint8_t registerValueLower = MA730_ReadRegister(csPort, csPin, 0x0);
+    uint8_t registerValueUpper = MA730_ReadRegister(csPort, csPin, 0x1);
+
+    uint16_t registerValue =
+        (((uint16_t)registerValueUpper) << 8) | registerValueLower;
+    return 1.0f - (float)registerValue / (float)0xffff;
+}
+
+void MA730_SetZero(GPIO_TypeDef* csPort, uint16_t csPin, float zeroPosition) {
+    uint16_t registerValue = ((float)0xffff) * (1 - zeroPosition);
+    uint8_t registerValueLower = registerValue & 0xff;
+    uint8_t registerValueUpper = (registerValue >> 8) & 0xff;
+    MA730_WriteRegister(csPort, csPin, 0x0, registerValueLower);
+    MA730_WriteRegister(csPort, csPin, 0x1, registerValueUpper);
 }

@@ -18,4 +18,8 @@ void MA730_WriteRegister(GPIO_TypeDef* csPort, uint16_t csPin,
 
 uint8_t MA730_GetError(GPIO_TypeDef* csPort, uint16_t csPin);
 
+float MA730_GetZero(GPIO_TypeDef* csPort, uint16_t csPin);
+
+void MA730_SetZero(GPIO_TypeDef* csPort, uint16_t csPin, float zeroPosition);
+
 #endif // MA730_DRIVER
