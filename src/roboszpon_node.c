@@ -169,6 +169,9 @@ void RoboszponNode_WriteParam(roboszpon_node_t* node, uint8_t paramId,
         MA730_SetZero(node->motor->encoderCsPort, node->motor->encoderCsPin,
                       value);
         break;
+    case PARAM_AXIS_OFFSET:
+        node->motor->positionOffset = value;
+        break;
     case PARAM_PPID_Kp:
         node->motorController->positionPid.Kp = value;
         break;
@@ -268,6 +271,8 @@ float RoboszponNode_ReadParam(roboszpon_node_t* node, uint8_t paramId) {
     case PARAM_ENCODER_ZERO:
         return MA730_GetZero(node->motor->encoderCsPort,
                              node->motor->encoderCsPin);
+    case PARAM_AXIS_OFFSET:
+        return node->motor->positionOffset;
     case PARAM_PPID_Kp:
         return node->motorController->positionPid.Kp;
     case PARAM_PPID_Ki:
