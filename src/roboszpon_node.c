@@ -1,10 +1,11 @@
 #include "roboszpon_node.h"
 #include "ma730_driver.h"
 #include "message_serialization.h"
+#include "ntc_driver.h"
 #include "roboszpon_message.h"
 #include <math.h>
 
-uint64_t RoboszponNode_CheckError(roboszpon_node_t* node);
+void RoboszponNode_UpdateFlags(roboszpon_node_t* node);
 void RoboszponNode_StoppedStep(roboszpon_node_t* node);
 void RoboszponNode_RunningStep(roboszpon_node_t* node);
 void RoboszponNode_ErrorStep(roboszpon_node_t* node);
@@ -16,7 +17,7 @@ void RoboszponNode_WriteParam(roboszpon_node_t* node, uint8_t paramId,
 float RoboszponNode_ReadParam(roboszpon_node_t* node, uint8_t paramId);
 
 void RoboszponNode_Step(roboszpon_node_t* node) {
-    // node->flags = RoboszponNode_CheckError(node);
+    RoboszponNode_UpdateFlags(node);
     SendMessage_StatusReport(node);
     switch (node->state) {
     case ROBOSZPON_NODE_STATE_STOPPED:
@@ -35,13 +36,22 @@ void RoboszponNode_Step(roboszpon_node_t* node) {
     }
 }
 
-uint64_t RoboszponNode_CheckError(roboszpon_node_t* node) {
-    uint64_t error = 0;
+void RoboszponNode_UpdateFlags(roboszpon_node_t* node) {
+    // 1. Check for encoder errors
     uint8_t encoderError =
         MA730_GetError(node->motor->encoderCsPort, node->motor->encoderCsPin);
-    error |= encoderError;
-    // TODO: check for other errors. (Command timeout included)
-    return error;
+    node->flags |= encoderError;
+    // 2. Check for overheating / reset overheating error
+    node->temperature = NTC_ADC2Temperature(ReadAdc(ADC_THERMISTOR));
+    if (node->flags & ROBOSZPON_ERROR_OVERHEAT) {
+        if (node->temperature < node->overheatResetThreshold) {
+            node->flags &= ~ROBOSZPON_ERROR_OVERHEAT;
+        }
+    } else {
+        if (node->temperature > node->overheatThreshold) {
+            node->flags |= ROBOSZPON_ERROR_OVERHEAT;
+        }
+    }
 }
 
 void RoboszponNode_StoppedStep(roboszpon_node_t* node) {

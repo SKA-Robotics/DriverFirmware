@@ -5,10 +5,8 @@ uint16_t BuildFrameId(uint8_t nodeId, uint8_t messageId);
 
 void SendMessage_StatusReport(roboszpon_node_t* node) {
     uint16_t frameId = BuildFrameId(node->nodeId, MSG_STATUS_REPORT);
-    uint64_t flags =
-        node->flags &
-        0x3FFFFFFFFFFFFFFF; // Make sure two most significant bits are free
     uint8_t mode = node->state;
+    uint16_t flags = node->flags;
     uint64_t data = ((uint64_t)mode) << 62 | flags;
     if (TransmitCanFrame(frameId, data, CAN_TX_TIMEOUT) != HAL_OK) {
         CanErrorHandler();

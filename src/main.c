@@ -2,6 +2,7 @@
 #include "math.h"
 #include "message_serialization.h"
 #include "motor.h"
+#include "ntc_driver.h"
 #include "roboszpon_node.h"
 #include "system.h"
 
@@ -107,14 +108,18 @@ roboszpon_node_t node0 = {.nodeId = MOTOR0_NODEID,
                           .motorController = &motorController0,
                           .messageQueue = &messageQueue0,
                           .errorLedPort = LED_PORT,
-                          .errorLedPin = LED_ENC0_PIN};
+                          .errorLedPin = LED_ENC0_PIN,
+                          .overheatThreshold = 800,
+                          .overheatResetThreshold = 600};
 roboszpon_node_t node1 = {.nodeId = MOTOR1_NODEID,
                           .state = ROBOSZPON_NODE_STATE_STOPPED,
                           .motor = &motor1,
                           .motorController = &motorController1,
                           .messageQueue = &messageQueue1,
                           .errorLedPort = LED_PORT,
-                          .errorLedPin = LED_ENC1_PIN};
+                          .errorLedPin = LED_ENC1_PIN,
+                          .overheatThreshold = 800,
+                          .overheatResetThreshold = 600};
 
 void MainLoop() {
     RoboszponNode_Step(&node0);
@@ -158,8 +163,8 @@ int main() {
     // Start the timers, begin working
     HAL_TIM_Base_Start_IT(&htim2);
     HAL_TIM_Base_Start_IT(&htim4);
-
     while (1) {
+        HAL_Delay(500);
     }
 }
 
