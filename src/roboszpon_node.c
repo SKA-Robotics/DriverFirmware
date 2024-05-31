@@ -38,8 +38,7 @@ void RoboszponNode_Step(roboszpon_node_t* node) {
 
 void RoboszponNode_UpdateFlags(roboszpon_node_t* node) {
     // 1. Check for encoder errors
-    uint8_t encoderError =
-        MA730_GetError(node->motor->encoderCsPort, node->motor->encoderCsPin);
+    uint8_t encoderError = MA730_GetError(node->motor->encoder);
     node->flags |= encoderError;
     // 2. Check for overheating / reset overheating error
     node->temperature = NTC_ADC2Temperature(ReadAdc(ADC_THERMISTOR));
@@ -176,8 +175,7 @@ void RoboszponNode_WriteParam(roboszpon_node_t* node, uint8_t paramId,
         break;
     case PARAM_ENCODER_ZERO:
         value = fmod(value, 1.0f);
-        MA730_SetZero(node->motor->encoderCsPort, node->motor->encoderCsPin,
-                      value);
+        MA730_SetZero(node->motor->encoder, value);
         break;
     case PARAM_AXIS_OFFSET:
         node->motor->positionOffset = value;
@@ -294,9 +292,9 @@ void RoboszponNode_WriteParam(roboszpon_node_t* node, uint8_t paramId,
         node->motor->invertAxis = (value > 0.5f);
         break;
     case PARAM_INVERT_ENCODER:
-        MA730_SetRotationDirection(
-            node->motor->encoderCsPort, node->motor->encoderCsPin,
-            (value > 0.5f) ? MA730_DIRECTION_REVERSE : MA730_DIRECTION_FORWARD);
+        MA730_SetRotationDirection(node->motor->encoder,
+                                   (value > 0.5f) ? MA730_DIRECTION_REVERSE
+                                                  : MA730_DIRECTION_FORWARD);
         break;
     default:
         break;
@@ -308,8 +306,7 @@ float RoboszponNode_ReadParam(roboszpon_node_t* node, uint8_t paramId) {
     case PARAM_COMMAND_TIMEOUT:
         return ((float)node->commandTimeout) / 1000.0f;
     case PARAM_ENCODER_ZERO:
-        return MA730_GetZero(node->motor->encoderCsPort,
-                             node->motor->encoderCsPin);
+        return MA730_GetZero(node->motor->encoder);
     case PARAM_AXIS_OFFSET:
         return node->motor->positionOffset;
     case PARAM_PPID_Kp:
@@ -387,8 +384,7 @@ float RoboszponNode_ReadParam(roboszpon_node_t* node, uint8_t paramId) {
     case PARAM_INVERT_AXIS:
         return (node->motor->invertAxis) ? 1.0f : 0.0f;
     case PARAM_INVERT_ENCODER:
-        return (MA730_GetRotationDirection(node->motor->encoderCsPort,
-                                           node->motor->encoderCsPin) ==
+        return (MA730_GetRotationDirection(node->motor->encoder) ==
                 MA730_DIRECTION_REVERSE)
                    ? 1.0f
                    : 0.0f;

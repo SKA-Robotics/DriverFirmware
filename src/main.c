@@ -10,8 +10,11 @@ motor_t motor0 = {
     .pwmChannelForward = &TIM3->CCR1,
     .pwmChannelReverse = &TIM3->CCR2,
     .adcChannel = ADC_MOTOR0_CURRENT,
-    .encoderCsPort = CS_ENC0DRV0_PORT,
-    .encoderCsPin = CS_ENC0_PIN,
+    .encoder =
+        {
+            .csPort = CS_ENC0DRV0_PORT,
+            .csPin = CS_ENC0_PIN,
+        },
     .invertAxis = 0,
     .positionOffset = 0.0f,
     .currentMeasurementFilter = {.coefficient = 0.9},
@@ -22,8 +25,11 @@ motor_t motor1 = {
     .pwmChannelForward = &TIM1->CCR1,
     .pwmChannelReverse = &TIM1->CCR2,
     .adcChannel = ADC_MOTOR1_CURRENT,
-    .encoderCsPort = CS_ENC1DRV1_PORT,
-    .encoderCsPin = CS_ENC1_PIN,
+    .encoder =
+        {
+            .csPort = CS_ENC1DRV1_PORT,
+            .csPin = CS_ENC1_PIN,
+        },
     .invertAxis = 0,
     .positionOffset = 0.0f,
     .currentMeasurementFilter = {.coefficient = 0.9},

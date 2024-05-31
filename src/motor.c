@@ -23,8 +23,7 @@ void Motor_SetDuty(motor_t* motor, float duty) {
 }
 
 void Motor_UpdateState(motor_t* motor) {
-    uint16_t positionMeasurement =
-        MA730_ReadAngle(motor->encoderCsPort, motor->encoderCsPin);
+    uint16_t positionMeasurement = MA730_ReadAngle(motor->encoder);
     long deltaPositionRaw =
         positionMeasurement - motor->state.prevPositionMeasurement;
     motor->state.prevPositionMeasurement = positionMeasurement;

@@ -2,6 +2,7 @@
 #define MOTOR_H
 
 #include "filter.h"
+#include "ma730_driver.h"
 #include "system.h"
 #include <stdint.h>
 
@@ -39,10 +40,9 @@ struct motor {
     volatile uint32_t* pwmChannelReverse;
     // ADC channel corresponding to motor current measurement
     uint32_t adcChannel;
-    GPIO_TypeDef* encoderCsPort; // Port of encoder chip select pin
-    uint16_t encoderCsPin;       // Encoder chip select pin
-    uint8_t invertAxis;          // Inverts the motor rotation direction
-    float positionOffset;        // Motor position offset
+    ma730_encoder_t encoder; // Encoder connected to the motor axis
+    uint8_t invertAxis;      // Inverts the motor rotation direction
+    float positionOffset;    // Motor position offset
     iir_filter_t
         currentMeasurementFilter; // IIR filter applied to measured current
     iir_filter_t

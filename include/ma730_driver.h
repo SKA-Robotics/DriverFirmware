@@ -11,23 +11,26 @@
 #define MA730_DIRECTION_FORWARD 0x00
 #define MA730_DIRECTION_REVERSE 0x80
 
-uint16_t MA730_ReadAngle(GPIO_TypeDef* csPort, uint16_t csPin);
+typedef struct {
+    GPIO_TypeDef* csPort;
+    uint16_t csPin;
+} ma730_encoder_t;
 
-uint16_t MA730_ReadRegister(GPIO_TypeDef* csPort, uint16_t csPin,
-                            uint8_t registerAddress);
+uint16_t MA730_ReadAngle(ma730_encoder_t encoder);
 
-void MA730_WriteRegister(GPIO_TypeDef* csPort, uint16_t csPin,
-                         uint8_t registerAddress, uint8_t value);
+uint16_t MA730_ReadRegister(ma730_encoder_t encoder, uint8_t registerAddress);
 
-uint8_t MA730_GetError(GPIO_TypeDef* csPort, uint16_t csPin);
+void MA730_WriteRegister(ma730_encoder_t encoder, uint8_t registerAddress,
+                         uint8_t value);
 
-float MA730_GetZero(GPIO_TypeDef* csPort, uint16_t csPin);
+uint8_t MA730_GetError(ma730_encoder_t encoder);
 
-void MA730_SetZero(GPIO_TypeDef* csPort, uint16_t csPin, float zeroPosition);
+float MA730_GetZero(ma730_encoder_t encoder);
 
-uint8_t MA730_GetRotationDirection(GPIO_TypeDef* csPort, uint16_t csPin);
+void MA730_SetZero(ma730_encoder_t encoder, float zeroPosition);
 
-void MA730_SetRotationDirection(GPIO_TypeDef* csPort, uint16_t csPin,
-                                uint8_t direction);
+uint8_t MA730_GetRotationDirection(ma730_encoder_t encoder);
+
+void MA730_SetRotationDirection(ma730_encoder_t encoder, uint8_t direction);
 
 #endif // MA730_DRIVER
