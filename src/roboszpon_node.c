@@ -284,6 +284,12 @@ void RoboszponNode_WriteParam(roboszpon_node_t* node, uint8_t paramId,
     case PARAM_MAX_DUTY:
         node->motorController->params.maxDuty = value;
         break;
+    case PARAM_OVERHEAT_TEMPERATURE:
+        node->overheatThreshold = (uint32_t)(value * 10.0f);
+        break;
+    case PARAM_NO_OVERHEAT_TEMPERATURE:
+        node->overheatResetThreshold = (uint32_t)(value * 10.0f);
+        break;
     default:
         break;
     }
@@ -366,6 +372,10 @@ float RoboszponNode_ReadParam(roboszpon_node_t* node, uint8_t paramId) {
         return node->motorController->params.minDuty;
     case PARAM_MAX_DUTY:
         return node->motorController->params.maxDuty;
+    case PARAM_OVERHEAT_TEMPERATURE:
+        return (float)node->overheatThreshold * 0.1f;
+    case PARAM_NO_OVERHEAT_TEMPERATURE:
+        return (float)node->overheatResetThreshold * 0.1f;
     default:
         return 0.0f;
     }
