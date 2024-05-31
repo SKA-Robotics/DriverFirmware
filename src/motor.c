@@ -4,6 +4,9 @@
 
 void Motor_SetDuty(motor_t* motor, float duty) {
     motor->state.duty = duty;
+    if (motor->invertAxis) {
+        duty = -duty;
+    }
     uint32_t pwm = fabs(duty) * 1023;
     if (pwm > MAX_PWM) {
         pwm = MAX_PWM;
@@ -35,7 +38,6 @@ void Motor_UpdateState(motor_t* motor) {
     }
 
     motor->state.positionRaw += deltaPositionRaw;
-
     motor->state.position =
         motor->positionOffset +
         (float)motor->state.positionRaw / ENCODER_RESOLUTION;

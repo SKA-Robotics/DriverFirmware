@@ -41,6 +41,7 @@ struct motor {
     uint32_t adcChannel;
     GPIO_TypeDef* encoderCsPort; // Port of encoder chip select pin
     uint16_t encoderCsPin;       // Encoder chip select pin
+    uint8_t invertAxis;          // Inverts the motor rotation direction
     float positionOffset;        // Motor position offset
     iir_filter_t
         currentMeasurementFilter; // IIR filter applied to measured current

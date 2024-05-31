@@ -290,6 +290,14 @@ void RoboszponNode_WriteParam(roboszpon_node_t* node, uint8_t paramId,
     case PARAM_NO_OVERHEAT_TEMPERATURE:
         node->overheatResetThreshold = (uint32_t)(value * 10.0f);
         break;
+    case PARAM_INVERT_AXIS:
+        node->motor->invertAxis = (value > 0.5f);
+        break;
+    case PARAM_INVERT_ENCODER:
+        MA730_SetRotationDirection(
+            node->motor->encoderCsPort, node->motor->encoderCsPin,
+            (value > 0.5f) ? MA730_DIRECTION_REVERSE : MA730_DIRECTION_FORWARD);
+        break;
     default:
         break;
     }
@@ -376,6 +384,14 @@ float RoboszponNode_ReadParam(roboszpon_node_t* node, uint8_t paramId) {
         return (float)node->overheatThreshold * 0.1f;
     case PARAM_NO_OVERHEAT_TEMPERATURE:
         return (float)node->overheatResetThreshold * 0.1f;
+    case PARAM_INVERT_AXIS:
+        return (node->motor->invertAxis) ? 1.0f : 0.0f;
+    case PARAM_INVERT_ENCODER:
+        return (MA730_GetRotationDirection(node->motor->encoderCsPort,
+                                           node->motor->encoderCsPin) ==
+                MA730_DIRECTION_REVERSE)
+                   ? 1.0f
+                   : 0.0f;
     default:
         return 0.0f;
     }

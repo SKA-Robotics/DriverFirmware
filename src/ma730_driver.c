@@ -85,3 +85,12 @@ void MA730_SetZero(GPIO_TypeDef* csPort, uint16_t csPin, float zeroPosition) {
     MA730_WriteRegister(csPort, csPin, 0x0, registerValueLower);
     MA730_WriteRegister(csPort, csPin, 0x1, registerValueUpper);
 }
+
+uint8_t MA730_GetRotationDirection(GPIO_TypeDef* csPort, uint16_t csPin) {
+    return MA730_ReadRegister(csPort, csPin, 0x9);
+}
+
+void MA730_SetRotationDirection(GPIO_TypeDef* csPort, uint16_t csPin,
+                                uint8_t direction) {
+    MA730_WriteRegister(csPort, csPin, 0x9, direction);
+}
