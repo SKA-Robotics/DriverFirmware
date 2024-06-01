@@ -1,3 +1,4 @@
+#include "drv8873_driver.h"
 #include "ma730_driver.h"
 #include "math.h"
 #include "message_serialization.h"
@@ -36,6 +37,9 @@ motor_t motor1 = {
     .velocityMeasurementFilter = {.coefficient = 0.9},
     .state = {0}, // Default initial state
 };
+
+drv8873_device_t drv8873_0 = {CS_ENC0DRV0_PORT, CS_DRV0_PIN};
+drv8873_device_t drv8873_1 = {CS_ENC1DRV1_PORT, CS_DRV1_PIN};
 
 motor_controller_t motorController0 = {
     .motor = &motor0,

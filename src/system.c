@@ -122,8 +122,8 @@ void MX_GPIO_Init(void) {
 void MX_TIM2_Init(void) {
     __HAL_RCC_TIM2_CLK_ENABLE();
     htim2.Instance = TIM2;
-    htim2.Init.Period = 10 - 1;       // 100 Hz
-    htim2.Init.Prescaler = 36000 - 1; // Tick every millisecond
+    htim2.Init.Period = 10 - 1;      // 1 kHz
+    htim2.Init.Prescaler = 3600 - 1; // Tick every 0.1 millisecond
     htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -229,8 +229,8 @@ void MX_SPI_Init(void) {
     hspi1.Init.Mode = SPI_MODE_MASTER;
     hspi1.Init.Direction = SPI_DIRECTION_2LINES;
     hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-    hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
-    hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
+    hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+    hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
     hspi1.Init.NSS = SPI_NSS_SOFT;
     hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
     hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
@@ -348,8 +348,14 @@ int TransmitCanFrame(uint16_t arbitrationId, uint64_t data, uint32_t timeout) {
 
 void ErrorHandler(void) {
     __disable_irq();
-    printf("Error\n");
+    HAL_GPIO_WritePin(LED_PORT, LED_ENC0_PIN, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED_PORT, LED_ENC1_PIN, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED_PORT, LED_CAN_PIN, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED_PORT, LED_POWER_PIN, GPIO_PIN_RESET);
     while (1) {
+        HAL_Delay(250);
+        HAL_GPIO_TogglePin(LED_PORT, LED_ENC0_PIN);
+        HAL_GPIO_TogglePin(LED_PORT, LED_ENC1_PIN);
     };
 }
 
