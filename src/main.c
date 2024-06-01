@@ -38,9 +38,6 @@ motor_t motor1 = {
     .state = {0}, // Default initial state
 };
 
-drv8873_device_t drv8873_0 = {CS_ENC0DRV0_PORT, CS_DRV0_PIN};
-drv8873_device_t drv8873_1 = {CS_ENC1DRV1_PORT, CS_DRV1_PIN};
-
 motor_controller_t motorController0 = {
     .motor = &motor0,
     .params = {.minDuty = -1.0f,
@@ -119,6 +116,7 @@ roboszpon_node_t node0 = {.nodeId = MOTOR0_NODEID,
                           .motor = &motor0,
                           .motorController = &motorController0,
                           .messageQueue = &messageQueue0,
+                          .drv8873 = {CS_ENC0DRV0_PORT, CS_DRV0_PIN},
                           .errorLedPort = LED_PORT,
                           .errorLedPin = LED_ENC0_PIN,
                           .overheatThreshold = 800,
@@ -128,6 +126,7 @@ roboszpon_node_t node1 = {.nodeId = MOTOR1_NODEID,
                           .motor = &motor1,
                           .motorController = &motorController1,
                           .messageQueue = &messageQueue1,
+                          .drv8873 = {CS_ENC1DRV1_PORT, CS_DRV1_PIN},
                           .errorLedPort = LED_PORT,
                           .errorLedPin = LED_ENC1_PIN,
                           .overheatThreshold = 800,

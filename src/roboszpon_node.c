@@ -37,10 +37,14 @@ void RoboszponNode_Step(roboszpon_node_t* node) {
 }
 
 void RoboszponNode_UpdateFlags(roboszpon_node_t* node) {
+    node->flags = ROBOSZPON_NO_ERROR;
     // 1. Check for encoder errors
-    uint8_t encoderError = MA730_GetError(node->motor->encoder);
-    node->flags |= encoderError;
-    // 2. Check for overheating / reset overheating error
+    uint8_t error = MA730_GetError(node->motor->encoder);
+    node->flags |= (error & ROBOSZPON_ENC_ERROR_MASK);
+    // 2. Check for drv errors
+    error = DRV8873_GetError(node->drv8873);
+    node->flags |= (((uint16_t)error << 8) & ROBOSZPON_DRV_ERROR_MASK);
+    // 3. Check for overheating / reset overheating error
     node->temperature = NTC_ADC2Temperature(ReadAdc(ADC_THERMISTOR));
     if (node->flags & ROBOSZPON_ERROR_OVERHEAT) {
         if (node->temperature < node->overheatResetThreshold) {

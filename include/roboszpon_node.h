@@ -1,17 +1,28 @@
 #ifndef ROBOSZPON_NODE_H
 #define ROBOSZPON_NODE_H
 
+#include "drv8873_driver.h"
 #include <message_queue.h>
 #include <motor.h>
 #include <motor_controller.h>
 #include <stdint.h>
 
 #define ROBOSZPON_NO_ERROR 0
-#define ROBOSZPON_ERROR_ENCDISCONNECT 1 << 5
-#define ROBOSZPON_ERROR_ENCMGL 1 << 6
-#define ROBOSZPON_ERROR_ENCMGH 1 << 7
-#define ROBOSZPON_ERROR_CMDTIMEOUT 1 << 8
-#define ROBOSZPON_ERROR_OVERHEAT 1 << 9
+#define ROBOSZPON_ERROR_OVERHEAT 1 << 4
+#define ROBOSZPON_ERROR_EncDISCONNECT 1 << 5
+#define ROBOSZPON_ERROR_EncMGL 1 << 6
+#define ROBOSZPON_ERROR_EncMGH 1 << 7
+#define ROBOSZPON_ERROR_DrvOLD 1 << 8
+#define ROBOSZPON_ERROR_DrvTSD 1 << 9
+#define ROBOSZPON_ERROR_DrvOCP 1 << 10
+#define ROBOSZPON_ERROR_DrvCPUV 1 << 11
+#define ROBOSZPON_ERROR_DrvUVLO 1 << 12
+#define ROBOSZPON_ERROR_DrvOTW 1 << 13
+#define ROBOSZPON_ERROR_DrvFault 1 << 14
+#define ROBOSZPON_ERROR_CMDTIMEOUT 1 << 15
+
+#define ROBOSZPON_ENC_ERROR_MASK 0b11100000
+#define ROBOSZPON_DRV_ERROR_MASK 0b01111111 << 8
 
 #define ROBOSZPON_NODE_STATE_STOPPED 0x00
 #define ROBOSZPON_NODE_STATE_RUNNING 0x01
@@ -24,6 +35,7 @@ typedef struct {
     motor_t* motor; // Pointer to the motor corresponding to the node
     motor_controller_t* motorController; // Pointer to motor controller
     message_queue_t* messageQueue;       // Message queue pointer
+    drv8873_device_t drv8873;            // Pointer to the DRV8873 device
     GPIO_TypeDef* errorLedPort;          // GPIO port of the error LED
     uint16_t errorLedPin;                // GPIO pin of the error LED
     uint32_t commandTimeout;             // Command timeout (milliseconds)
