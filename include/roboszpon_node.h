@@ -29,10 +29,11 @@
 #define ROBOSZPON_NODE_STATE_ERROR 0x02
 
 typedef struct {
-    uint8_t nodeId; // CAN node ID of the motor node
-    uint8_t state;  // Current state of the node state machine
-    uint16_t flags; // node status flags, sent over CAN.
-    motor_t* motor; // Pointer to the motor corresponding to the node
+    uint8_t nodeId;         // CAN node ID of the motor node
+    uint32_t configAddress; // Address of node configuration in FLASH memory
+    uint8_t state;          // Current state of the node state machine
+    uint16_t flags;         // node status flags, sent over CAN.
+    motor_t* motor;         // Pointer to the motor corresponding to the node
     motor_controller_t* motorController; // Pointer to motor controller
     message_queue_t* messageQueue;       // Message queue pointer
     drv8873_device_t drv8873;            // Pointer to the DRV8873 device
@@ -46,5 +47,10 @@ typedef struct {
 } roboszpon_node_t;
 
 void RoboszponNode_Step(roboszpon_node_t* node);
+
+void RoboszponNode_WriteParam(roboszpon_node_t* node, uint8_t paramId,
+                              float value);
+
+float RoboszponNode_ReadParam(roboszpon_node_t* node, uint8_t paramId);
 
 #endif // ROBOSZPON_NODE_H

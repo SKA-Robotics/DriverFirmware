@@ -1,4 +1,4 @@
-#include "roboszpon_node.h"
+#include "flash_memory.h"
 #include "ma730_driver.h"
 #include "message_serialization.h"
 #include "ntc_driver.h"
@@ -10,6 +10,8 @@ void RoboszponNode_StoppedStep(roboszpon_node_t* node);
 void RoboszponNode_RunningStep(roboszpon_node_t* node);
 void RoboszponNode_ErrorStep(roboszpon_node_t* node);
 void RoboszponNode_Disarm(roboszpon_node_t* node);
+void RoboszponNode_PerformActionStopped(roboszpon_node_t* node,
+                                        uint8_t actionId);
 void RoboszponNode_ApplyMotorCommand(roboszpon_node_t* node,
                                      roboszpon_message_t* command);
 void RoboszponNode_WriteParam(roboszpon_node_t* node, uint8_t paramId,
@@ -73,12 +75,11 @@ void RoboszponNode_StoppedStep(roboszpon_node_t* node) {
             float value = RoboszponNode_ReadParam(node, request.paramId);
             SendMessage_ParameterResponse(node->nodeId, request.paramId, value);
         } break;
-        case MSG_ACTION_REQUEST:
-            if (message.data == ACTION_ARM) {
-                node->state = ROBOSZPON_NODE_STATE_RUNNING;
-            }
-            // TODO: implement all the other actions
-            break;
+        case MSG_ACTION_REQUEST: {
+            uint8_t actionId = ParseMessage_ActionRequest(&message).actionId;
+            RoboszponNode_PerformActionStopped(node, actionId);
+        } break;
+
         default:
             // Ignore all the other messages
             break;
@@ -149,6 +150,23 @@ void RoboszponNode_Disarm(roboszpon_node_t* node) {
     MotorController_SetVelocitySetpoint(node->motorController, 0.0f);
     MotorController_SetDutySetpoint(node->motorController, 0.0f);
     Motor_SetDuty(node->motor, 0.0f);
+}
+
+void RoboszponNode_PerformActionStopped(roboszpon_node_t* node,
+                                        uint8_t actionId) {
+    switch (actionId) {
+    case ACTION_ARM:
+        node->state = ROBOSZPON_NODE_STATE_RUNNING;
+        break;
+    case ACTION_COMMIT_CONFIG:
+        Flash_SaveNodeConfig(node->configAddress, node);
+        break;
+    case ACTION_RESTORE_CONFIG:
+        Flash_LoadNodeConfig(node->configAddress, node);
+        break;
+    default:
+        break;
+    }
 }
 
 void RoboszponNode_ApplyMotorCommand(roboszpon_node_t* node,

@@ -1,4 +1,5 @@
 #include "drv8873_driver.h"
+#include "flash_memory.h"
 #include "ma730_driver.h"
 #include "math.h"
 #include "message_serialization.h"
@@ -112,6 +113,7 @@ message_queue_t messageQueue0;
 message_queue_t messageQueue1;
 
 roboszpon_node_t node0 = {.nodeId = MOTOR0_NODEID,
+                          .configAddress = 0x0800f800,
                           .state = ROBOSZPON_NODE_STATE_STOPPED,
                           .motor = &motor0,
                           .motorController = &motorController0,
@@ -122,6 +124,7 @@ roboszpon_node_t node0 = {.nodeId = MOTOR0_NODEID,
                           .overheatThreshold = 800,
                           .overheatResetThreshold = 600};
 roboszpon_node_t node1 = {.nodeId = MOTOR1_NODEID,
+                          .configAddress = 0x0800fc00,
                           .state = ROBOSZPON_NODE_STATE_STOPPED,
                           .motor = &motor1,
                           .motorController = &motorController1,
@@ -159,6 +162,9 @@ int main() {
     MX_CAN_Init();
     MessageQueue_Init(&messageQueue0);
     MessageQueue_Init(&messageQueue1);
+    // Restore saved configuration
+    Flash_LoadNodeConfig(node0.configAddress, &node0);
+    Flash_LoadNodeConfig(node1.configAddress, &node1);
     // Set interrupt priorities
     HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 2);
     HAL_NVIC_SetPriority(TIM2_IRQn, 0, 1);
@@ -170,7 +176,6 @@ int main() {
     HAL_GPIO_WritePin(LED_PORT, LED_CAN_PIN | LED_ENC0_PIN | LED_ENC1_PIN,
                       GPIO_PIN_RESET);
     HAL_GPIO_WritePin(LED_PORT, LED_POWER_PIN, GPIO_PIN_SET);
-
     // Start the timers, begin working
     HAL_TIM_Base_Start_IT(&htim2);
     HAL_TIM_Base_Start_IT(&htim4);
@@ -186,7 +191,7 @@ void USB_LP_CAN1_RX0_IRQHandler(void) {
     HAL_CAN_RxFifo0MsgPendingCallback(&hcan);
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* const htim) {
     if (htim == &htim2) {
         MotorControlLoop();
     } else if (htim == &htim4) {

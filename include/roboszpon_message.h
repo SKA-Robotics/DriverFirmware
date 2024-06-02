@@ -18,8 +18,9 @@
 
 #define ACTION_ARM 0x00
 #define ACTION_DISARM 0x01
-#define ACTION_SET_AXIS_ZERO_HERE 0x02
-#define ACTION_COMMIT_CONFIG 0x03
+#define ACTION_COMMIT_CONFIG 0x02
+#define ACTION_RESTORE_CONFIG 0x03
+#define ACTION_SET_FACTORY_CONFIG 0x04
 
 #define PARAM_COMMAND_TIMEOUT 0x00
 #define PARAM_ENCODER_ZERO 0x01
@@ -64,7 +65,9 @@
 #define PARAM_NO_OVERHEAT_TEMPERATURE 0x51
 #define PARAM_INVERT_AXIS 0x52
 #define PARAM_INVERT_ENCODER 0x53
-// and many more ...
+// and many more ... Don't exceed 0x7f, as it wouldn't fit in the flash
+#define MIN_PARAM_ADDRESS 0x00
+#define MAX_PARAM_ADDRESS 0x7f
 
 #define CTRLSIGNAL_DUTY 0x00
 #define CTRLSIGNAL_VELOCITY 0x01
@@ -103,7 +106,6 @@ ParseMessage_ParameterWrite(roboszpon_message_t* message);
 
 typedef struct {
     uint8_t paramId;
-    float value;
 } message_parameter_read_t;
 
 message_parameter_read_t

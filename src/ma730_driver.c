@@ -62,7 +62,7 @@ uint8_t MA730_GetError(ma730_device_t encoder) {
     flags &= 0b10111111;
     uint8_t mg1l = (flags >> 3) & 0x01;
     uint8_t mg2l = (flags >> 2) & 0x01;
-    uint8_t mgl = !(mg1l | mg2l) & 0x01;
+    uint8_t mgl = ~(mg1l | mg2l) & 0x01;
     flags |= mgl << 6;
     flags &= 0b11000000;
     return flags;
