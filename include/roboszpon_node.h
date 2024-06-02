@@ -48,9 +48,4 @@ typedef struct {
 
 void RoboszponNode_Step(roboszpon_node_t* node);
 
-void RoboszponNode_WriteParam(roboszpon_node_t* node, uint8_t paramId,
-                              float value);
-
-float RoboszponNode_ReadParam(roboszpon_node_t* node, uint8_t paramId);
-
 #endif // ROBOSZPON_NODE_H
