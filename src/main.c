@@ -17,10 +17,6 @@ motor_t motor0 = {
             .csPort = CS_ENC0DRV0_PORT,
             .csPin = CS_ENC0_PIN,
         },
-    .invertAxis = 0,
-    .positionOffset = 0.0f,
-    .currentMeasurementFilter = {.coefficient = 0.9},
-    .velocityMeasurementFilter = {.coefficient = 0.9},
     .state = {0}, // Default initial state
 };
 motor_t motor1 = {
@@ -32,86 +28,12 @@ motor_t motor1 = {
             .csPort = CS_ENC1DRV1_PORT,
             .csPin = CS_ENC1_PIN,
         },
-    .invertAxis = 0,
-    .positionOffset = 0.0f,
-    .currentMeasurementFilter = {.coefficient = 0.9},
-    .velocityMeasurementFilter = {.coefficient = 0.9},
     .state = {0}, // Default initial state
 };
-
-motor_controller_t motorController0 = {
-    .motor = &motor0,
-    .params = {.minDuty = -1.0f,
-               .maxDuty = 1.0f,
-               .minCurrent = -1.0f,
-               .maxCurrent = 1.0f,
-               .minVelocity = -1.0f,
-               .maxVelocity = 1.0f,
-               .minPosition = -INFINITY,
-               .maxPosition = +INFINITY},
-    .currentPid = {.Kp = 1.0f,
-                   .Ki = 0.1f,
-                   .Kd = 0.0f,
-                   .Kaw = 0.8f,
-                   .deadzone = 0.01f,
-                   .du_max = +INFINITY,
-                   .u_max = +INFINITY},
-    .velocityPid = {.Kp = 1.0f,
-                    .Ki = 0.1f,
-                    .Kd = 0.0f,
-                    .Kaw = 0.8f,
-                    .deadzone = 0.01f,
-                    .du_max = +INFINITY,
-                    .u_max = +INFINITY},
-    .positionPid = {.Kp = 3.0f,
-                    .Ki = 0.2f,
-                    .Kd = 0.0f,
-                    .Kaw = 0.8f,
-                    .deadzone = 0.01f,
-                    .du_max = +INFINITY,
-                    .u_max = +INFINITY},
-    .currentPidOutputFilter = {.coefficient = 0.5},
-    .velocityPidOutputFilter = {.coefficient = 0.5},
-    .positionPidOutputFilter = {.coefficient = 0.5}};
-
-motor_controller_t motorController1 = {
-    .motor = &motor1,
-    .params = {.minDuty = -1.0f,
-               .maxDuty = 1.0f,
-               .minCurrent = -1.0f,
-               .maxCurrent = 1.0f,
-               .minVelocity = -1.0f,
-               .maxVelocity = 1.0f,
-               .minPosition = -INFINITY,
-               .maxPosition = +INFINITY},
-    .currentPid = {.Kp = 1.0f,
-                   .Ki = 0.0f,
-                   .Kd = 0.0f,
-                   .Kaw = 0.8f,
-                   .deadzone = 0.01f,
-                   .du_max = +INFINITY,
-                   .u_max = +INFINITY},
-    .velocityPid = {.Kp = 1.0f,
-                    .Ki = 0.0f,
-                    .Kd = 0.0f,
-                    .Kaw = 0.8f,
-                    .deadzone = 0.01f,
-                    .du_max = +INFINITY,
-                    .u_max = +INFINITY},
-    .positionPid = {.Kp = 1.0f,
-                    .Ki = 0.0f,
-                    .Kd = 0.0f,
-                    .Kaw = 0.8f,
-                    .deadzone = 0.01f,
-                    .du_max = +INFINITY,
-                    .u_max = +INFINITY},
-    .currentPidOutputFilter = {.coefficient = 0.5},
-    .velocityPidOutputFilter = {.coefficient = 0.5},
-    .positionPidOutputFilter = {.coefficient = 0.5}};
-
+motor_controller_t motorController0 = {.motor = &motor0};
+motor_controller_t motorController1 = {.motor = &motor1};
 message_queue_t messageQueue0;
 message_queue_t messageQueue1;
-
 roboszpon_node_t node0 = {.nodeId = MOTOR0_NODEID,
                           .configAddress = 0x0800f800,
                           .state = ROBOSZPON_NODE_STATE_STOPPED,
@@ -120,9 +42,7 @@ roboszpon_node_t node0 = {.nodeId = MOTOR0_NODEID,
                           .messageQueue = &messageQueue0,
                           .drv8873 = {CS_ENC0DRV0_PORT, CS_DRV0_PIN},
                           .errorLedPort = LED_PORT,
-                          .errorLedPin = LED_ENC0_PIN,
-                          .overheatThreshold = 800,
-                          .overheatResetThreshold = 600};
+                          .errorLedPin = LED_ENC0_PIN};
 roboszpon_node_t node1 = {.nodeId = MOTOR1_NODEID,
                           .configAddress = 0x0800fc00,
                           .state = ROBOSZPON_NODE_STATE_STOPPED,
@@ -131,9 +51,7 @@ roboszpon_node_t node1 = {.nodeId = MOTOR1_NODEID,
                           .messageQueue = &messageQueue1,
                           .drv8873 = {CS_ENC1DRV1_PORT, CS_DRV1_PIN},
                           .errorLedPort = LED_PORT,
-                          .errorLedPin = LED_ENC1_PIN,
-                          .overheatThreshold = 800,
-                          .overheatResetThreshold = 600};
+                          .errorLedPin = LED_ENC1_PIN};
 
 void MainLoop() {
     RoboszponNode_Step(&node0);
@@ -148,6 +66,8 @@ void MotorControlLoop() {
         MotorController_Step(node1.motorController);
     }
 }
+
+void PlayAnimation(void);
 
 int main() {
     HAL_Init();
@@ -171,14 +91,13 @@ int main() {
     HAL_NVIC_SetPriority(TIM4_IRQn, 2, 0);
     HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
     HAL_NVIC_SetPriority(USB_LP_CAN1_RX0_IRQn, 1, 0);
-    HAL_NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
 
-    HAL_GPIO_WritePin(LED_PORT, LED_CAN_PIN | LED_ENC0_PIN | LED_ENC1_PIN,
-                      GPIO_PIN_RESET);
+    PlayAnimation();
     HAL_GPIO_WritePin(LED_PORT, LED_POWER_PIN, GPIO_PIN_SET);
-    // Start the timers, begin working
+    // Start the timers and CAN, begin working
     HAL_TIM_Base_Start_IT(&htim2);
     HAL_TIM_Base_Start_IT(&htim4);
+    HAL_NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
     while (1) {
         HAL_Delay(500);
     }
@@ -213,4 +132,32 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
         MessageQueue_Enqueue(node0.messageQueue, message);
         MessageQueue_Enqueue(node1.messageQueue, message);
     }
+}
+
+void PlayAnimation(void) {
+    HAL_GPIO_WritePin(LED_PORT,
+                      LED_POWER_PIN | LED_CAN_PIN | LED_ENC0_PIN | LED_ENC1_PIN,
+                      GPIO_PIN_RESET);
+    HAL_Delay(5);
+    HAL_GPIO_TogglePin(LED_PORT, LED_POWER_PIN);
+    HAL_Delay(100);
+    HAL_GPIO_TogglePin(LED_PORT, LED_CAN_PIN);
+    HAL_Delay(100);
+    HAL_GPIO_TogglePin(LED_PORT, LED_POWER_PIN);
+    HAL_GPIO_TogglePin(LED_PORT, LED_ENC0_PIN);
+    HAL_Delay(100);
+    HAL_GPIO_TogglePin(LED_PORT, LED_CAN_PIN);
+    HAL_GPIO_TogglePin(LED_PORT, LED_ENC1_PIN);
+    HAL_Delay(100);
+    HAL_GPIO_TogglePin(LED_PORT, LED_ENC0_PIN);
+    HAL_Delay(100);
+    HAL_GPIO_TogglePin(LED_PORT, LED_ENC0_PIN);
+    HAL_Delay(100);
+    HAL_GPIO_TogglePin(LED_PORT, LED_CAN_PIN);
+    HAL_GPIO_TogglePin(LED_PORT, LED_ENC1_PIN);
+    HAL_Delay(100);
+    HAL_GPIO_TogglePin(LED_PORT, LED_POWER_PIN);
+    HAL_GPIO_TogglePin(LED_PORT, LED_ENC0_PIN);
+    HAL_Delay(100);
+    HAL_GPIO_TogglePin(LED_PORT, LED_CAN_PIN);
 }

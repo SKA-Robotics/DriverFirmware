@@ -45,6 +45,8 @@ void MX_GPIO_Init(void) {
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW,
     HAL_GPIO_Init(LED_PORT, &GPIO_InitStruct);
+    HAL_GPIO_WritePin(LED_PORT, LED_CAN_PIN | LED_ENC0_PIN | LED_ENC1_PIN,
+                      GPIO_PIN_RESET);
 
     // PWM
     GPIO_InitStruct.Pin = PWM0_CH1_PIN | PWM0_CH2_PIN;
