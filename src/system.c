@@ -134,7 +134,7 @@ void MX_TIM2_Init(void) {
 void MX_TIM4_Init(void) {
     __HAL_RCC_TIM4_CLK_ENABLE();
     htim4.Instance = TIM4;
-    htim4.Init.Period = 50 - 1;       // 20 Hz
+    htim4.Init.Period = 20 - 1;       // 50 Hz
     htim4.Init.Prescaler = 36000 - 1; // Tick every millisecond
     htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;

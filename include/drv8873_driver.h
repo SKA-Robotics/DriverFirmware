@@ -4,15 +4,15 @@
 #include "system.h"
 
 #define DRV8873_NO_ERROR 0
-#define DRV8873_ERROR_Fault 1 << 6
-#define DRV8873_ERROR_OTW 1 << 5
-#define DRV8873_ERROR_UVLO 1 << 4
-#define DRV8873_ERROR_CPUV 1 << 3
-#define DRV8873_ERROR_OCP 1 << 2
-#define DRV8873_ERROR_TSD 1 << 1
-#define DRV8873_ERROR_OLD 1 << 0
+#define DRV8873_ERROR_Fault (1 << 6)
+#define DRV8873_ERROR_OTW (1 << 5)
+#define DRV8873_ERROR_UVLO (1 << 4)
+#define DRV8873_ERROR_CPUV (1 << 3)
+#define DRV8873_ERROR_OCP (1 << 2)
+#define DRV8873_ERROR_TSD (1 << 1)
+#define DRV8873_ERROR_OLD (1 << 0)
 
-#define DRV8873_CLR_FLT_BIT 1 << 7
+#define DRV8873_CLR_FLT_BIT (1 << 7)
 
 typedef struct {
     GPIO_TypeDef* csPort;

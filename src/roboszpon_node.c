@@ -10,7 +10,7 @@ void RoboszponNode_UpdateFlags(roboszpon_node_t* node);
 void RoboszponNode_StoppedStep(roboszpon_node_t* node);
 void RoboszponNode_RunningStep(roboszpon_node_t* node);
 void RoboszponNode_ErrorStep(roboszpon_node_t* node);
-void RoboszponNode_Disarm(roboszpon_node_t* node);
+void RoboszponNode_StopMotor(roboszpon_node_t* node);
 void RoboszponNode_PerformActionStopped(roboszpon_node_t* node,
                                         uint8_t actionId);
 void RoboszponNode_ApplyMotorCommand(roboszpon_node_t* node,
@@ -40,12 +40,13 @@ void RoboszponNode_Step(roboszpon_node_t* node) {
 }
 
 void RoboszponNode_UpdateFlags(roboszpon_node_t* node) {
-    node->flags = ROBOSZPON_NO_ERROR;
     // 1. Check for encoder errors
     uint8_t error = MA730_GetError(node->motor->encoder);
+    node->flags &= ~ROBOSZPON_ENC_ERROR_MASK;
     node->flags |= (error & ROBOSZPON_ENC_ERROR_MASK);
     // 2. Check for drv errors
     error = DRV8873_GetError(node->drv8873);
+    node->flags &= ~ROBOSZPON_DRV_ERROR_MASK;
     node->flags |= (((uint16_t)error << 8) & ROBOSZPON_DRV_ERROR_MASK);
     // 3. Check for overheating / reset overheating error
     node->temperature = NTC_ADC2Temperature(ReadAdc(ADC_THERMISTOR));
@@ -57,6 +58,14 @@ void RoboszponNode_UpdateFlags(roboszpon_node_t* node) {
         if (node->temperature > node->overheatThreshold) {
             node->flags |= ROBOSZPON_ERROR_OVERHEAT;
         }
+    }
+    // 4. Check for command timeout
+    uint8_t timedOut =
+        (node->latestCommandTime + node->commandTimeout < HAL_GetTick());
+    if (timedOut && node->state == ROBOSZPON_NODE_STATE_RUNNING) {
+        node->flags |= ROBOSZPON_ERROR_CMDTIMEOUT;
+    } else {
+        node->flags &= ~ROBOSZPON_ERROR_CMDTIMEOUT;
     }
 }
 
@@ -80,7 +89,6 @@ void RoboszponNode_StoppedStep(roboszpon_node_t* node) {
             uint8_t actionId = ParseMessage_ActionRequest(&message).actionId;
             RoboszponNode_PerformActionStopped(node, actionId);
         } break;
-
         default:
             // Ignore all the other messages
             break;
@@ -90,9 +98,12 @@ void RoboszponNode_StoppedStep(roboszpon_node_t* node) {
 
 void RoboszponNode_RunningStep(roboszpon_node_t* node) {
     if (node->flags != ROBOSZPON_NO_ERROR) { // Error detected
-        Motor_SetDuty(node->motor, 0.0f);
-        HAL_GPIO_WritePin(node->errorLedPort, node->errorLedPin, GPIO_PIN_SET);
-        node->state = ROBOSZPON_NODE_STATE_ERROR;
+        RoboszponNode_StopMotor(node);
+        if ((node->flags & ERROR_MASK) != ROBOSZPON_NO_ERROR) { // Crit. error
+            HAL_GPIO_WritePin(node->errorLedPort, node->errorLedPin,
+                              GPIO_PIN_SET);
+            node->state = ROBOSZPON_NODE_STATE_ERROR;
+        }
     }
     int isThereAMotorCommand = 0;
     roboszpon_message_t message;
@@ -101,7 +112,7 @@ void RoboszponNode_RunningStep(roboszpon_node_t* node) {
         MessageQueue_Dequeue(node->messageQueue, &message);
         switch (message.id) {
         case MSG_EMERGENCY_STOP:
-            RoboszponNode_Disarm(node);
+            RoboszponNode_StopMotor(node);
             node->state = ROBOSZPON_NODE_STATE_STOPPED;
             return;
         case MSG_MOTOR_COMMAND:
@@ -112,7 +123,7 @@ void RoboszponNode_RunningStep(roboszpon_node_t* node) {
         case MSG_ACTION_REQUEST:
             if (ParseMessage_ActionRequest(&message).actionId ==
                 ACTION_DISARM) {
-                RoboszponNode_Disarm(node);
+                RoboszponNode_StopMotor(node);
                 node->state = ROBOSZPON_NODE_STATE_STOPPED;
                 return;
             }
@@ -139,14 +150,16 @@ void RoboszponNode_ErrorStep(roboszpon_node_t* node) {
             }
         }
     }
-    if (node->flags == ROBOSZPON_NO_ERROR) { // All errors resolved
+    if ((node->flags & ERROR_MASK) == ROBOSZPON_NO_ERROR) {
+        // All errors resolved
         HAL_GPIO_WritePin(node->errorLedPort, node->errorLedPin,
                           GPIO_PIN_RESET);
         node->state = ROBOSZPON_NODE_STATE_RUNNING;
+        node->latestCommandTime = HAL_GetTick();
     }
 }
 
-void RoboszponNode_Disarm(roboszpon_node_t* node) {
+void RoboszponNode_StopMotor(roboszpon_node_t* node) {
     MotorController_SetPositionSetpoint(node->motorController, 0.0f);
     MotorController_SetVelocitySetpoint(node->motorController, 0.0f);
     MotorController_SetDutySetpoint(node->motorController, 0.0f);
@@ -158,6 +171,7 @@ void RoboszponNode_PerformActionStopped(roboszpon_node_t* node,
     switch (actionId) {
     case ACTION_ARM:
         node->state = ROBOSZPON_NODE_STATE_RUNNING;
+        node->latestCommandTime = HAL_GetTick();
         break;
     case ACTION_COMMIT_CONFIG:
         Flash_SaveNodeConfig(node->configAddress, node);
@@ -176,6 +190,8 @@ void RoboszponNode_PerformActionStopped(roboszpon_node_t* node,
 
 void RoboszponNode_ApplyMotorCommand(roboszpon_node_t* node,
                                      roboszpon_message_t* command) {
+    node->latestCommandTime = HAL_GetTick();
+    node->flags &= !ROBOSZPON_ERROR_CMDTIMEOUT;
     message_motor_command_t message = ParseMessage_MotorCommand(command);
     switch (message.controlSignalId) {
     case CTRLSIGNAL_DUTY:
@@ -190,6 +206,8 @@ void RoboszponNode_ApplyMotorCommand(roboszpon_node_t* node,
         MotorController_SetDutySetpoint(node->motorController, message.value);
         MotorController_SetPositionSetpoint(node->motorController,
                                             message.value);
+        break;
+    default:
         break;
     }
 }

@@ -8,21 +8,23 @@
 #include <stdint.h>
 
 #define ROBOSZPON_NO_ERROR 0
-#define ROBOSZPON_ERROR_OVERHEAT 1 << 4
-#define ROBOSZPON_ERROR_EncDISCONNECT 1 << 5
-#define ROBOSZPON_ERROR_EncMGL 1 << 6
-#define ROBOSZPON_ERROR_EncMGH 1 << 7
-#define ROBOSZPON_ERROR_DrvOLD 1 << 8
-#define ROBOSZPON_ERROR_DrvTSD 1 << 9
-#define ROBOSZPON_ERROR_DrvOCP 1 << 10
-#define ROBOSZPON_ERROR_DrvCPUV 1 << 11
-#define ROBOSZPON_ERROR_DrvUVLO 1 << 12
-#define ROBOSZPON_ERROR_DrvOTW 1 << 13
-#define ROBOSZPON_ERROR_DrvFault 1 << 14
-#define ROBOSZPON_ERROR_CMDTIMEOUT 1 << 15
+#define ROBOSZPON_ERROR_OVERHEAT (1 << 4)
+#define ROBOSZPON_ERROR_EncDISCONNECT (1 << 5)
+#define ROBOSZPON_ERROR_EncMGL (1 << 6)
+#define ROBOSZPON_ERROR_EncMGH (1 << 7)
+#define ROBOSZPON_ERROR_DrvOLD (1 << 8)
+#define ROBOSZPON_ERROR_DrvTSD (1 << 9)
+#define ROBOSZPON_ERROR_DrvOCP (1 << 10)
+#define ROBOSZPON_ERROR_DrvCPUV (1 << 11)
+#define ROBOSZPON_ERROR_DrvUVLO (1 << 12)
+#define ROBOSZPON_ERROR_DrvOTW (1 << 13)
+#define ROBOSZPON_ERROR_DrvFault (1 << 14)
+#define ROBOSZPON_ERROR_CMDTIMEOUT (1 << 15)
+
+#define ERROR_MASK 0x7fff // CMDTIMEOUT doesn't cause an error state
 
 #define ROBOSZPON_ENC_ERROR_MASK 0b11100000
-#define ROBOSZPON_DRV_ERROR_MASK 0b01111111 << 8
+#define ROBOSZPON_DRV_ERROR_MASK (0b01111111 << 8)
 
 #define ROBOSZPON_NODE_STATE_STOPPED 0x00
 #define ROBOSZPON_NODE_STATE_RUNNING 0x01
@@ -44,6 +46,7 @@ typedef struct {
     uint32_t overheatThreshold;          // Overheat error threshold (0.1°C)
     uint32_t overheatResetThreshold; // Temperature below which overheat error
                                      // is cleared
+    uint32_t latestCommandTime;      // Time (ticks) of the latest motor command
 } roboszpon_node_t;
 
 void RoboszponNode_Step(roboszpon_node_t* node);
