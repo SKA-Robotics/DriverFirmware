@@ -17,7 +17,7 @@ void Flash_SaveNodeConfig(uint32_t pageAddress, roboszpon_node_t* node) {
          ++paramId) {
         uint32_t paramAddress = paramId * 4;
         float value = RoboszponConfig_ReadParam(node, paramId);
-        uint32_t data = *(uint32_t*)&value;
+        uint32_t data = FloatAsUint32(value);
         HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, pageAddress + paramAddress,
                           data);
     }
@@ -29,7 +29,7 @@ void Flash_LoadNodeConfig(uint32_t pageAddress, roboszpon_node_t* node) {
          ++paramId) {
         uint32_t paramAddress = paramId * 4;
         uint32_t data = *(__IO uint32_t*)(pageAddress + paramAddress);
-        RoboszponConfig_WriteParam(node, paramId, *(float*)&data);
+        RoboszponConfig_WriteParam(node, paramId, Uint32AsFloat(data));
     }
 }
 

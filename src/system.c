@@ -368,3 +368,20 @@ void CanErrorHandler(void) {
 void CanSuccessHandler(void) {
     HAL_GPIO_WritePin(LED_PORT, LED_CAN_PIN, GPIO_PIN_SET);
 }
+
+typedef union {
+    uint32_t u32;
+    float f32;
+} float_int_union;
+
+float Uint32AsFloat(uint32_t u32) {
+    float_int_union u;
+    u.u32 = u32;
+    return u.f32;
+}
+
+uint32_t FloatAsUint32(float f32) {
+    float_int_union u;
+    u.f32 = f32;
+    return u.u32;
+}

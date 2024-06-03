@@ -86,4 +86,7 @@ void ErrorHandler(void);
 void CanErrorHandler(void);
 void CanSuccessHandler(void);
 
+float Uint32AsFloat(uint32_t u32);
+uint32_t FloatAsUint32(float f32);
+
 #endif // SYSTEM_H

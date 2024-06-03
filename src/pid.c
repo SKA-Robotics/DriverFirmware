@@ -9,8 +9,9 @@ float StepPid(pid_controller_t* pid, float e) {
     }
 
     float u_d = (e - pid->prevE) / DELTA_TIME;
-    float u_i =
-        e * DELTA_TIME + pid->prevUi + pid->Kaw * pid->antiwindup_correction;
+    // TODO: Do a good anti windup
+    float u_i = e * DELTA_TIME + pid->prevUi;
+    // u_i += pid->Kaw * pid->antiwindup_correction;
     float u_raw = pid->Kp * e + pid->Ki * u_i + pid->Kd * u_d;
 
     // Clamp U signal increment

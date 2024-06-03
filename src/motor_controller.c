@@ -75,7 +75,7 @@ void VelocityControl(motor_controller_t* controller, float setpoint) {
         ApplyIirFilter(&controller->currentPidOutputFilter, dutySetpoint);
     DutyControl(controller, dutySetpoint);
     // TODO: Disable the following line and test:
-    DutyControl(controller, currentSetpoint);
+    // DutyControl(controller, currentSetpoint);
 }
 
 void PositionControl(motor_controller_t* controller, float setpoint) {

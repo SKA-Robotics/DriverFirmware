@@ -1,4 +1,5 @@
 #include "roboszpon_message.h"
+#include "system.h"
 
 roboszpon_message_t DecodeCanMessage(uint32_t arbitrationId, uint8_t dataLength,
                                      uint8_t* data) {
@@ -25,7 +26,7 @@ ParseMessage_MotorCommand(roboszpon_message_t* message) {
     message_motor_command_t result;
     result.controlSignalId = (message->data >> 56) & 0xff;
     uint32_t valueBits = (message->data >> 24) & 0xffffffff;
-    result.value = *(float*)&valueBits;
+    result.value = Uint32AsFloat(valueBits);
     return result;
 }
 
@@ -41,7 +42,7 @@ ParseMessage_ParameterWrite(roboszpon_message_t* message) {
     message_parameter_write_t result;
     result.paramId = (message->data >> 56) & 0xff;
     uint32_t valueBits = (message->data >> 24) & 0xffffffff;
-    result.value = *(float*)&valueBits;
+    result.value = Uint32AsFloat(valueBits);
     return result;
 }
 
