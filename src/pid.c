@@ -8,30 +8,36 @@ float StepPid(pid_controller_t* pid, float e) {
         e = 0.0f;
     }
 
-    float u_d = (e - pid->prevE) / DELTA_TIME;
-    // TODO: Do a good anti windup
-    float u_i = e * DELTA_TIME + pid->prevUi;
-    // u_i += pid->Kaw * pid->antiwindup_correction;
-    float u_raw = pid->Kp * e + pid->Ki * u_i + pid->Kd * u_d;
+    float u_p = pid->Kp * e;
+    float u_i = pid->Ki * (e * DELTA_TIME) + pid->prevUi;
+    float u_d = pid->Kd * (e - pid->prevE) / DELTA_TIME;
+    float u_raw = u_p + u_i + u_d;
 
     // Clamp U signal increment
     float du = u_raw - pid->prevU;
-    if (du > pid->du_max) {
-        du = pid->du_max;
-    } else if (du < -pid->du_max) {
-        du = -pid->du_max;
+    if (du > pid->duMax) {
+        du = pid->duMax;
+    } else if (du < -pid->duMax) {
+        du = -pid->duMax;
     }
 
     float u = pid->prevU + du;
 
     // Clamp U signal
-    if (u > pid->u_max) {
-        u = pid->u_max;
-    } else if (u < -pid->u_max) {
-        u = -pid->u_max;
+    if (u > pid->uMax) {
+        u = pid->uMax;
+        // Anti-windup protection
+        u_i = pid->uMax - u_p - u_d;
+        if (u_i < 0.0f) {
+            u_i = 0.0f;
+        }
+    } else if (u < pid->uMin) {
+        u = pid->uMin;
+        u_i = pid->uMin - u_p - u_d;
+        if (u_i > 0.0f) {
+            u_i = 0.0f;
+        }
     }
-
-    pid->antiwindup_correction = u - u_raw;
 
     pid->prevE = e;
     pid->prevU = u;

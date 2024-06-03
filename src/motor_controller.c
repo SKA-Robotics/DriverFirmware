@@ -63,19 +63,12 @@ void VelocityControl(motor_controller_t* controller, float setpoint) {
     float currentSetpoint = StepPid(&controller->velocityPid, e);
     currentSetpoint =
         ApplyIirFilter(&controller->velocityPidOutputFilter, currentSetpoint);
-    // TODO: feedforward from trajectory generator:
-    // currentSetpoint += controller->trajectoryGenerator->acceleration *
-    //                    controller->params.accelerationFeedForwardGain;
-    currentSetpoint = clampf(currentSetpoint, controller->params.minCurrent,
-                             controller->params.maxCurrent);
     float currentMeasurement = controller->motor->state.current;
     e = currentSetpoint - currentMeasurement;
     float dutySetpoint = StepPid(&controller->currentPid, e);
     dutySetpoint =
         ApplyIirFilter(&controller->currentPidOutputFilter, dutySetpoint);
     DutyControl(controller, dutySetpoint);
-    // TODO: Disable the following line and test:
-    // DutyControl(controller, currentSetpoint);
 }
 
 void PositionControl(motor_controller_t* controller, float setpoint) {
@@ -86,8 +79,5 @@ void PositionControl(motor_controller_t* controller, float setpoint) {
     float velocitySetpoint = StepPid(&controller->positionPid, e);
     velocitySetpoint =
         ApplyIirFilter(&controller->positionPidOutputFilter, velocitySetpoint);
-    // TODO: feedforward from trajectory generator:
-    // velocitySetpoint += controller->trajectoryGenerator->velocity *
-    //                     controller->params.velocityFeedForwardGain;
     VelocityControl(controller, velocitySetpoint);
 }

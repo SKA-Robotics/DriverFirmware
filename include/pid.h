@@ -5,10 +5,10 @@ typedef struct {
     float Kp;
     float Ki;
     float Kd;
-    float Kaw;
     float deadzone;
-    float u_max;
-    float du_max;
+    float uMin;
+    float uMax;
+    float duMax;
     float prevE;
     float prevUi;
     float prevU;

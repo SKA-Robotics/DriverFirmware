@@ -10,26 +10,20 @@ void RoboszponConfig_LoadDefault(roboszpon_node_t* node) {
     RoboszponConfig_WriteParam(node, PARAM_PPID_Kp, DEFAULT_PPID_Kp);
     RoboszponConfig_WriteParam(node, PARAM_PPID_Ki, DEFAULT_PPID_Ki);
     RoboszponConfig_WriteParam(node, PARAM_PPID_Kd, DEFAULT_PPID_Kd);
-    RoboszponConfig_WriteParam(node, PARAM_PPID_Kaw, DEFAULT_PPID_Kaw);
     RoboszponConfig_WriteParam(node, PARAM_PPID_deadzone,
                                DEFAULT_PPID_deadzone);
-    RoboszponConfig_WriteParam(node, PARAM_PPID_Umax, DEFAULT_PPID_Umax);
     RoboszponConfig_WriteParam(node, PARAM_PPID_dUmax, DEFAULT_PPID_dUmax);
     RoboszponConfig_WriteParam(node, PARAM_VPID_Kp, DEFAULT_VPID_Kp);
     RoboszponConfig_WriteParam(node, PARAM_VPID_Ki, DEFAULT_VPID_Ki);
     RoboszponConfig_WriteParam(node, PARAM_VPID_Kd, DEFAULT_VPID_Kd);
-    RoboszponConfig_WriteParam(node, PARAM_VPID_Kaw, DEFAULT_VPID_Kaw);
     RoboszponConfig_WriteParam(node, PARAM_VPID_deadzone,
                                DEFAULT_VPID_deadzone);
-    RoboszponConfig_WriteParam(node, PARAM_VPID_Umax, DEFAULT_VPID_Umax);
     RoboszponConfig_WriteParam(node, PARAM_VPID_dUmax, DEFAULT_VPID_dUmax);
     RoboszponConfig_WriteParam(node, PARAM_CPID_Kp, DEFAULT_CPID_Kp);
     RoboszponConfig_WriteParam(node, PARAM_CPID_Ki, DEFAULT_CPID_Ki);
     RoboszponConfig_WriteParam(node, PARAM_CPID_Kd, DEFAULT_CPID_Kd);
-    RoboszponConfig_WriteParam(node, PARAM_CPID_Kaw, DEFAULT_CPID_Kaw);
     RoboszponConfig_WriteParam(node, PARAM_CPID_deadzone,
                                DEFAULT_CPID_deadzone);
-    RoboszponConfig_WriteParam(node, PARAM_CPID_Umax, DEFAULT_CPID_Umax);
     RoboszponConfig_WriteParam(node, PARAM_CPID_dUmax, DEFAULT_CPID_dUmax);
     RoboszponConfig_WriteParam(node, PARAM_IIR_VALUE_CURMEAS,
                                DEFAULT_IIR_VALUE_CURMEAS);
@@ -41,10 +35,6 @@ void RoboszponConfig_LoadDefault(roboszpon_node_t* node) {
                                DEFAULT_IIR_VALUE_VPIDU);
     RoboszponConfig_WriteParam(node, PARAM_IIR_VALUE_CPIDU,
                                DEFAULT_IIR_VALUE_CPIDU);
-    RoboszponConfig_WriteParam(node, PARAM_VELFeedForward_GAIN,
-                               DEFAULT_VELFeedForward_GAIN);
-    RoboszponConfig_WriteParam(node, PARAM_ACCFeedForward_GAIN,
-                               DEFAULT_ACCFeedForward_GAIN);
     RoboszponConfig_WriteParam(node, PARAM_MIN_POSITION, DEFAULT_MIN_POSITION);
     RoboszponConfig_WriteParam(node, PARAM_MAX_POSITION, DEFAULT_MAX_POSITION);
     RoboszponConfig_WriteParam(node, PARAM_MIN_VELOCITY, DEFAULT_MIN_VELOCITY);
@@ -86,17 +76,11 @@ void RoboszponConfig_WriteParam(roboszpon_node_t* node, uint8_t paramId,
     case PARAM_PPID_Kd:
         node->motorController->positionPid.Kd = value;
         break;
-    case PARAM_PPID_Kaw:
-        node->motorController->positionPid.Kaw = value;
-        break;
     case PARAM_PPID_deadzone:
         node->motorController->positionPid.deadzone = value;
         break;
-    case PARAM_PPID_Umax:
-        node->motorController->positionPid.u_max = value;
-        break;
     case PARAM_PPID_dUmax:
-        node->motorController->positionPid.du_max = value;
+        node->motorController->positionPid.duMax = value;
         break;
     case PARAM_VPID_Kp:
         node->motorController->velocityPid.Kp = value;
@@ -107,17 +91,11 @@ void RoboszponConfig_WriteParam(roboszpon_node_t* node, uint8_t paramId,
     case PARAM_VPID_Kd:
         node->motorController->velocityPid.Kd = value;
         break;
-    case PARAM_VPID_Kaw:
-        node->motorController->velocityPid.Kaw = value;
-        break;
     case PARAM_VPID_deadzone:
         node->motorController->velocityPid.deadzone = value;
         break;
-    case PARAM_VPID_Umax:
-        node->motorController->velocityPid.u_max = value;
-        break;
     case PARAM_VPID_dUmax:
-        node->motorController->velocityPid.du_max = value;
+        node->motorController->velocityPid.duMax = value;
         break;
     case PARAM_CPID_Kp:
         node->motorController->currentPid.Kp = value;
@@ -128,17 +106,11 @@ void RoboszponConfig_WriteParam(roboszpon_node_t* node, uint8_t paramId,
     case PARAM_CPID_Kd:
         node->motorController->currentPid.Kd = value;
         break;
-    case PARAM_CPID_Kaw:
-        node->motorController->currentPid.Kaw = value;
-        break;
     case PARAM_CPID_deadzone:
         node->motorController->currentPid.deadzone = value;
         break;
-    case PARAM_CPID_Umax:
-        node->motorController->currentPid.u_max = value;
-        break;
     case PARAM_CPID_dUmax:
-        node->motorController->currentPid.du_max = value;
+        node->motorController->currentPid.duMax = value;
         break;
     case PARAM_IIR_VALUE_CURMEAS:
         node->motor->currentMeasurementFilter.coefficient = value;
@@ -163,21 +135,27 @@ void RoboszponConfig_WriteParam(roboszpon_node_t* node, uint8_t paramId,
         break;
     case PARAM_MIN_VELOCITY:
         node->motorController->params.minVelocity = value;
+        node->motorController->positionPid.uMin = value;
         break;
     case PARAM_MAX_VELOCITY:
         node->motorController->params.maxVelocity = value;
+        node->motorController->positionPid.uMax = value;
         break;
     case PARAM_MIN_CURRENT:
         node->motorController->params.minCurrent = value;
+        node->motorController->velocityPid.uMin = value;
         break;
     case PARAM_MAX_CURRENT:
         node->motorController->params.maxCurrent = value;
+        node->motorController->velocityPid.uMax = value;
         break;
     case PARAM_MIN_DUTY:
         node->motorController->params.minDuty = value;
+        node->motorController->currentPid.uMin = value;
         break;
     case PARAM_MAX_DUTY:
         node->motorController->params.maxDuty = value;
+        node->motorController->currentPid.uMax = value;
         break;
     case PARAM_OVERHEAT_TEMPERATURE:
         node->overheatThreshold = (uint32_t)(value * 10.0f);
@@ -215,28 +193,20 @@ float RoboszponConfig_ReadParam(roboszpon_node_t* node, uint8_t paramId) {
         return node->motorController->positionPid.Ki;
     case PARAM_PPID_Kd:
         return node->motorController->positionPid.Kd;
-    case PARAM_PPID_Kaw:
-        return node->motorController->positionPid.Kaw;
     case PARAM_PPID_deadzone:
         return node->motorController->positionPid.deadzone;
-    case PARAM_PPID_Umax:
-        return node->motorController->positionPid.u_max;
     case PARAM_PPID_dUmax:
-        return node->motorController->positionPid.du_max;
+        return node->motorController->positionPid.duMax;
     case PARAM_VPID_Kp:
         return node->motorController->velocityPid.Kp;
     case PARAM_VPID_Ki:
         return node->motorController->velocityPid.Ki;
     case PARAM_VPID_Kd:
         return node->motorController->velocityPid.Kd;
-    case PARAM_VPID_Kaw:
-        return node->motorController->velocityPid.Kaw;
     case PARAM_VPID_deadzone:
         return node->motorController->velocityPid.deadzone;
-    case PARAM_VPID_Umax:
-        return node->motorController->velocityPid.u_max;
     case PARAM_VPID_dUmax:
-        return node->motorController->velocityPid.du_max;
+        return node->motorController->velocityPid.duMax;
     case PARAM_IIR_VALUE_CURMEAS:
         return node->motor->currentMeasurementFilter.coefficient;
     case PARAM_IIR_VALUE_VELMEAS:
@@ -253,14 +223,10 @@ float RoboszponConfig_ReadParam(roboszpon_node_t* node, uint8_t paramId) {
         return node->motorController->currentPid.Ki;
     case PARAM_CPID_Kd:
         return node->motorController->currentPid.Kd;
-    case PARAM_CPID_Kaw:
-        return node->motorController->currentPid.Kaw;
     case PARAM_CPID_deadzone:
         return node->motorController->currentPid.deadzone;
-    case PARAM_CPID_Umax:
-        return node->motorController->currentPid.u_max;
     case PARAM_CPID_dUmax:
-        return node->motorController->currentPid.du_max;
+        return node->motorController->currentPid.duMax;
     case PARAM_MIN_POSITION:
         return node->motorController->params.minPosition;
     case PARAM_MAX_POSITION:
