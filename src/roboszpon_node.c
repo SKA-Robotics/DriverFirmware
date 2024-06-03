@@ -183,6 +183,9 @@ void RoboszponNode_PerformActionStopped(roboszpon_node_t* node,
         RoboszponConfig_LoadDefault(node);
         Flash_SaveNodeConfig(node->configAddress, node);
         break;
+    case ACTION_SOFTWARE_RESET:
+        NVIC_SystemReset();
+        break;
     default:
         break;
     }

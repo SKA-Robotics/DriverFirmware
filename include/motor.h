@@ -13,7 +13,7 @@
 #define ENCODER_REVOLUTION_THRESHOLD 32137
 
 #define CURRENT_ADC_DEADZONE 3
-#define CURRENT_MULT 0.00125f
+#define CURRENT_MULT 0.00145f
 #define CURRENT_OFFSET 0.0000f
 
 typedef struct motor motor_t;
