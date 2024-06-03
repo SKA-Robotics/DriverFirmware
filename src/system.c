@@ -149,7 +149,7 @@ void MX_PWM_Init(void) {
     __HAL_RCC_TIM1_CLK_ENABLE();
     htim1.Instance = TIM1;
     htim1.Init.Period = MAX_PWM;
-    htim1.Init.Prescaler = 1;
+    htim1.Init.Prescaler = 1; // Tick every 1/36 microsecond (used for us delay)
     htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -169,7 +169,7 @@ void MX_PWM_Init(void) {
     __HAL_RCC_TIM3_CLK_ENABLE();
     htim3.Instance = TIM3;
     htim3.Init.Period = MAX_PWM;
-    htim3.Init.Prescaler = 1; // Tick every 1/36 microsecond (used for us delay)
+    htim3.Init.Prescaler = 1;
     htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
