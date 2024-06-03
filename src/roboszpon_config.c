@@ -60,6 +60,8 @@ void RoboszponConfig_LoadDefault(roboszpon_node_t* node) {
     RoboszponConfig_WriteParam(node, PARAM_INVERT_AXIS, DEFAULT_INVERT_AXIS);
     RoboszponConfig_WriteParam(node, PARAM_INVERT_ENCODER,
                                DEFAULT_INVERT_ENCODER);
+    RoboszponConfig_WriteParam(node, PARAM_ENCODER_FILTER_WINDOW,
+                               DEFAULT_ENCODER_FILTER_WINDOW);
 }
 
 void RoboszponConfig_WriteParam(roboszpon_node_t* node, uint8_t paramId,
@@ -191,6 +193,9 @@ void RoboszponConfig_WriteParam(roboszpon_node_t* node, uint8_t paramId,
                                    (value > 0.5f) ? MA730_DIRECTION_REVERSE
                                                   : MA730_DIRECTION_FORWARD);
         break;
+    case PARAM_ENCODER_FILTER_WINDOW:
+        MA730_SetFilterWindow(node->motor->encoder, value);
+        break;
     default:
         break;
     }
@@ -283,6 +288,8 @@ float RoboszponConfig_ReadParam(roboszpon_node_t* node, uint8_t paramId) {
                 MA730_DIRECTION_REVERSE)
                    ? 1.0f
                    : 0.0f;
+    case PARAM_ENCODER_FILTER_WINDOW:
+        return MA730_GetFilterWindow(node->motor->encoder);
     default:
         return 0.0f;
     }

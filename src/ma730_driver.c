@@ -92,3 +92,54 @@ uint8_t MA730_GetRotationDirection(ma730_device_t encoder) {
 void MA730_SetRotationDirection(ma730_device_t encoder, uint8_t direction) {
     MA730_WriteRegister(encoder, 0x9, direction);
 }
+
+float MA730_GetFilterWindow(ma730_device_t encoder) {
+    uint8_t registerValue = MA730_ReadRegister(encoder, 0xe);
+    switch (registerValue) {
+    case 51:
+        return 0.64f;
+    case 68:
+        return 0.128f;
+    case 85:
+        return 0.256f;
+    case 102:
+        return 0.512f;
+    case 119:
+        return 1.024f;
+    case 136:
+        return 2.048f;
+    case 153:
+        return 4.096f;
+    case 170:
+        return 8.192f;
+    case 187:
+        return 16.384f;
+    default:
+        return -1.0f; // Return a negative value if the register value is
+                      // unrecognized
+    }
+}
+
+void MA730_SetFilterWindow(ma730_device_t encoder, float windowLenght) {
+    uint8_t registerValue;
+    if (windowLenght < 0.128f) {
+        registerValue = 51;
+    } else if (windowLenght < 0.256f) {
+        registerValue = 68;
+    } else if (windowLenght < 0.512f) {
+        registerValue = 85;
+    } else if (windowLenght < 1.024f) {
+        registerValue = 102;
+    } else if (windowLenght < 2.048f) {
+        registerValue = 119;
+    } else if (windowLenght < 4.096f) {
+        registerValue = 136;
+    } else if (windowLenght < 8.192f) {
+        registerValue = 153;
+    } else if (windowLenght < 16.384f) {
+        registerValue = 170;
+    } else {
+        registerValue = 187;
+    }
+    MA730_WriteRegister(encoder, 0xe, registerValue);
+}

@@ -33,4 +33,8 @@ uint8_t MA730_GetRotationDirection(ma730_device_t encoder);
 
 void MA730_SetRotationDirection(ma730_device_t encoder, uint8_t direction);
 
+float MA730_GetFilterWindow(ma730_device_t encoder);
+
+void MA730_SetFilterWindow(ma730_device_t encoder, float windowLenght);
+
 #endif // MA730_DRIVER
