@@ -7,6 +7,7 @@ void RoboszponConfig_LoadDefault(roboszpon_node_t* node) {
                                DEFAULT_COMMAND_TIMEOUT);
     RoboszponConfig_WriteParam(node, PARAM_ENCODER_ZERO, DEFAULT_ENCODER_ZERO);
     RoboszponConfig_WriteParam(node, PARAM_AXIS_OFFSET, DEFAULT_AXIS_OFFSET);
+    RoboszponConfig_WriteParam(node, PARAM_REPORT_RATE, DEFAULT_REPORT_RATE);
     RoboszponConfig_WriteParam(node, PARAM_PPID_Kp, DEFAULT_PPID_Kp);
     RoboszponConfig_WriteParam(node, PARAM_PPID_Ki, DEFAULT_PPID_Ki);
     RoboszponConfig_WriteParam(node, PARAM_PPID_Kd, DEFAULT_PPID_Kd);
@@ -61,12 +62,19 @@ void RoboszponConfig_WriteParam(roboszpon_node_t* node, uint8_t paramId,
         node->commandTimeout = (uint32_t)(value * 1000.0f);
         break;
     case PARAM_ENCODER_ZERO:
-        value = fmod(value, 1.0f);
+        value = fmodf(value, 1.0f);
         MA730_SetZero(node->motor->encoder, value);
         break;
     case PARAM_AXIS_OFFSET:
         node->motor->positionOffset = value;
         break;
+    case PARAM_REPORT_RATE: {
+        uint32_t period = roundf(500.0f / value);
+        if (period < 1) {
+            period = 1;
+        }
+        node->reportPeriod = period;
+    } break;
     case PARAM_PPID_Kp:
         node->motorController->positionPid.Kp = value;
         break;
@@ -187,6 +195,8 @@ float RoboszponConfig_ReadParam(roboszpon_node_t* node, uint8_t paramId) {
         return MA730_GetZero(node->motor->encoder);
     case PARAM_AXIS_OFFSET:
         return node->motor->positionOffset;
+    case PARAM_REPORT_RATE:
+        return 500.0f / (float)node->reportPeriod;
     case PARAM_PPID_Kp:
         return node->motorController->positionPid.Kp;
     case PARAM_PPID_Ki:

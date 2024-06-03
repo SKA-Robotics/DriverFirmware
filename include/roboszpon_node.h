@@ -47,8 +47,10 @@ typedef struct {
     uint32_t overheatResetThreshold; // Temperature below which overheat error
                                      // is cleared
     uint32_t latestCommandTime;      // Time (ticks) of the latest motor command
+    uint32_t reportPeriod;           // Period of consecutive sent node reports
 } roboszpon_node_t;
 
+void RoboszponNode_Report(roboszpon_node_t* node);
 void RoboszponNode_Step(roboszpon_node_t* node);
 
 #endif // ROBOSZPON_NODE_H

@@ -19,16 +19,21 @@ void RoboszponConfig_WriteParam(roboszpon_node_t* node, uint8_t paramId,
                                 float value);
 float RoboszponConfig_ReadParam(roboszpon_node_t* node, uint8_t paramId);
 
+void RoboszponNode_Report(roboszpon_node_t* node) {
+    SendMessage_StatusReport(node);
+    if (node->state == ROBOSZPON_NODE_STATE_RUNNING) {
+        SendMessage_AxisReport(node);
+        SendMessage_MotorReport(node);
+    }
+}
+
 void RoboszponNode_Step(roboszpon_node_t* node) {
     RoboszponNode_UpdateFlags(node);
-    SendMessage_StatusReport(node);
     switch (node->state) {
     case ROBOSZPON_NODE_STATE_STOPPED:
         RoboszponNode_StoppedStep(node);
         return;
     case ROBOSZPON_NODE_STATE_RUNNING:
-        SendMessage_AxisReport(node);
-        SendMessage_MotorReport(node);
         RoboszponNode_RunningStep(node);
         return;
     case ROBOSZPON_NODE_STATE_ERROR:

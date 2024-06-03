@@ -98,8 +98,18 @@ int main() {
     HAL_TIM_Base_Start_IT(&htim2);
     HAL_TIM_Base_Start_IT(&htim4);
     HAL_NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
+    uint32_t node0Counter = 0;
+    uint32_t node1Counter = 0;
     while (1) {
-        HAL_Delay(500);
+        if (node0Counter++ > node0.reportPeriod) {
+            RoboszponNode_Report(&node0);
+            node0Counter = 0;
+        }
+        if (node1Counter++ > node1.reportPeriod) {
+            RoboszponNode_Report(&node1);
+            node1Counter = 0;
+        }
+        HAL_Delay(1);
     }
 }
 
