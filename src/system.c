@@ -362,6 +362,20 @@ void ErrorHandler(void) {
 }
 
 void CanErrorHandler(void) {
+    if (HAL_CAN_Stop(&hcan) != HAL_OK) {
+        ErrorHandler();
+    }
+    if (HAL_CAN_DeactivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) !=
+        HAL_OK) {
+        ErrorHandler();
+    };
+    if (HAL_CAN_Start(&hcan) != HAL_OK) {
+        ErrorHandler();
+    }
+    if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) !=
+        HAL_OK) {
+        ErrorHandler();
+    };
     HAL_GPIO_WritePin(LED_PORT, LED_CAN_PIN, GPIO_PIN_RESET);
 }
 
