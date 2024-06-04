@@ -23,7 +23,12 @@ void Motor_SetDuty(motor_t* motor, float duty) {
 }
 
 void Motor_UpdateState(motor_t* motor) {
-    uint16_t positionMeasurement = MA730_ReadAngle(motor->encoder);
+    uint16_t positionMeasurement =
+        (MA730_ReadAngle(motor->encoder) &
+         0xfffc); // Drop the last two bits (effective resolution of the encoder
+                  // doesn't exceed 14 bits),
+                  // https://www.monolithicpower.com/en/documentview/productdocument/index/version/2/document_type/Datasheet/lang/en/sku/MA732GQ-Z/,
+                  // Table 18
     long deltaPositionRaw =
         positionMeasurement - motor->state.prevPositionMeasurement;
     motor->state.prevPositionMeasurement = positionMeasurement;
