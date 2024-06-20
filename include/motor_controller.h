@@ -19,6 +19,7 @@ typedef struct {
     float minPosition;
     float maxPosition;
     float currentFeedforward;
+    float dutyDeadzone;
 } motor_controller_params_t;
 
 typedef struct {

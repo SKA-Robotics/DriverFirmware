@@ -140,6 +140,9 @@ void RoboszponConfig_WriteParam(roboszpon_node_t* node, uint8_t paramId,
     case PARAM_IIR_VALUE_CPIDU:
         node->motorController->currentPidOutputFilter.coefficient = value;
         break;
+    case PARAM_DUTY_DEADZONE:
+        node->motorController->params.dutyDeadzone = value;
+        break;
     case PARAM_MIN_POSITION:
         node->motorController->params.minPosition = value;
         break;
@@ -234,6 +237,8 @@ float RoboszponConfig_ReadParam(roboszpon_node_t* node, uint8_t paramId) {
         return node->motorController->velocityPidOutputFilter.coefficient;
     case PARAM_IIR_VALUE_CPIDU:
         return node->motorController->currentPidOutputFilter.coefficient;
+    case PARAM_DUTY_DEADZONE:
+        return node->motorController->params.dutyDeadzone;
     case PARAM_CPID_Kp:
         return node->motorController->currentPid.Kp;
     case PARAM_CPID_Ki:

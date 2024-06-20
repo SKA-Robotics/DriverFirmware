@@ -1,4 +1,5 @@
 #include "motor_controller.h"
+#include "math.h"
 
 float clampf(float value, float min, float max) {
     if (value > max)
@@ -50,6 +51,9 @@ void MotorController_SetDutySetpoint(motor_controller_t* controller,
 }
 
 void DutyControl(motor_controller_t* controller, float setpoint) {
+    if (fabsf(setpoint) < controller->params.dutyDeadzone) {
+        setpoint = 0.0f;
+    }
     Motor_SetDuty(controller->motor,
                   clampf(setpoint, controller->params.minDuty,
                          controller->params.maxDuty));
