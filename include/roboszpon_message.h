@@ -42,6 +42,7 @@
 #define PARAM_CPID_Kd 0x16
 #define PARAM_CPID_deadzone 0x18
 #define PARAM_CPID_dUmax 0x1a
+#define PARAM_CURRENT_FeedForward 0x1b
 #define PARAM_IIR_VALUE_CURMEAS 0x1c
 #define PARAM_IIR_VALUE_VELMEAS 0x1d
 #define PARAM_IIR_VALUE_PPIDU 0x1e

@@ -26,6 +26,8 @@ void RoboszponConfig_LoadDefault(roboszpon_node_t* node) {
     RoboszponConfig_WriteParam(node, PARAM_CPID_deadzone,
                                DEFAULT_CPID_deadzone);
     RoboszponConfig_WriteParam(node, PARAM_CPID_dUmax, DEFAULT_CPID_dUmax);
+    RoboszponConfig_WriteParam(node, PARAM_CURRENT_FeedForward,
+                               DEFAULT_CURRENT_FeedForward);
     RoboszponConfig_WriteParam(node, PARAM_IIR_VALUE_CURMEAS,
                                DEFAULT_IIR_VALUE_CURMEAS);
     RoboszponConfig_WriteParam(node, PARAM_IIR_VALUE_VELMEAS,
@@ -119,6 +121,9 @@ void RoboszponConfig_WriteParam(roboszpon_node_t* node, uint8_t paramId,
         break;
     case PARAM_CPID_dUmax:
         node->motorController->currentPid.duMax = value;
+        break;
+    case PARAM_CURRENT_FeedForward:
+        node->motorController->params.currentFeedforward = value;
         break;
     case PARAM_IIR_VALUE_CURMEAS:
         node->motor->currentMeasurementFilter.coefficient = value;
@@ -217,6 +222,8 @@ float RoboszponConfig_ReadParam(roboszpon_node_t* node, uint8_t paramId) {
         return node->motorController->velocityPid.deadzone;
     case PARAM_VPID_dUmax:
         return node->motorController->velocityPid.duMax;
+    case PARAM_CURRENT_FeedForward:
+        return node->motorController->params.currentFeedforward;
     case PARAM_IIR_VALUE_CURMEAS:
         return node->motor->currentMeasurementFilter.coefficient;
     case PARAM_IIR_VALUE_VELMEAS:

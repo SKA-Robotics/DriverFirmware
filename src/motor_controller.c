@@ -68,6 +68,7 @@ void VelocityControl(motor_controller_t* controller, float setpoint) {
     float dutySetpoint = StepPid(&controller->currentPid, e);
     dutySetpoint =
         ApplyIirFilter(&controller->currentPidOutputFilter, dutySetpoint);
+    dutySetpoint += currentSetpoint * controller->params.currentFeedforward;
     DutyControl(controller, dutySetpoint);
 }
 
