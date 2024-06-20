@@ -62,6 +62,7 @@
 #define PARAM_INVERT_AXIS 0x52
 #define PARAM_INVERT_ENCODER 0x53
 #define PARAM_ENCODER_FILTER_WINDOW 0x54
+#define PARAM_DISABLE_ENCODER_ERRORS 0x55
 // and many more ... Don't exceed 0x7f, as it wouldn't fit in the flash
 #define MIN_PARAM_ADDRESS 0x00
 #define MAX_PARAM_ADDRESS 0x7f

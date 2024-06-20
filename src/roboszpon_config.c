@@ -190,6 +190,9 @@ void RoboszponConfig_WriteParam(roboszpon_node_t* node, uint8_t paramId,
     case PARAM_ENCODER_FILTER_WINDOW:
         MA730_SetFilterWindow(node->motor->encoder, value);
         break;
+    case PARAM_DISABLE_ENCODER_ERRORS:
+        node->disableEncoderErrors = (value > 0.5f);
+        break;
     default:
         break;
     }
@@ -278,6 +281,8 @@ float RoboszponConfig_ReadParam(roboszpon_node_t* node, uint8_t paramId) {
                    : 0.0f;
     case PARAM_ENCODER_FILTER_WINDOW:
         return MA730_GetFilterWindow(node->motor->encoder);
+    case PARAM_DISABLE_ENCODER_ERRORS:
+        return (node->disableEncoderErrors) ? 1.0f : 0.0f;
     default:
         return 0.0f;
     }

@@ -46,7 +46,8 @@ void RoboszponNode_Step(roboszpon_node_t* node) {
 
 void RoboszponNode_UpdateFlags(roboszpon_node_t* node) {
     // 1. Check for encoder errors
-    uint8_t error = MA730_GetError(node->motor->encoder);
+    uint8_t error =
+        (node->disableEncoderErrors) ? 0 : MA730_GetError(node->motor->encoder);
     node->flags &= ~ROBOSZPON_ENC_ERROR_MASK;
     node->flags |= (error & ROBOSZPON_ENC_ERROR_MASK);
     // 2. Check for drv errors

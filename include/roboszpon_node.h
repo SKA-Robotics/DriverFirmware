@@ -48,6 +48,8 @@ typedef struct {
                                      // is cleared
     uint32_t latestCommandTime;      // Time (ticks) of the latest motor command
     uint32_t reportPeriod;           // Period of consecutive sent node reports
+    uint8_t disableEncoderErrors     // Disables encoder errors. To be used with
+                                     // simple duty control applications
 } roboszpon_node_t;
 
 void RoboszponNode_Report(roboszpon_node_t* node);
