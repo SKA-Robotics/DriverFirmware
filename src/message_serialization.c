@@ -51,7 +51,7 @@ void SendMessage_ParameterResponse(uint8_t nodeId, uint8_t paramId,
 }
 
 uint16_t BuildFrameId(uint8_t nodeId, uint8_t messageId) {
-    uint16_t result = (uint16_t)(nodeId & 0b11111) << 6;
-    result |= messageId & 0b111111;
+    uint16_t result = (uint16_t)(nodeId & 0b111111) << 5;
+    result |= messageId & 0b11111;
     return result;
 }

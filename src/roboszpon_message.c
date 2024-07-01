@@ -11,9 +11,9 @@ roboszpon_message_t DecodeCanMessage(uint32_t arbitrationId, uint8_t dataLength,
         message.data = 0;
         return message;
     }
-    // 5 MSB are the node ID. 6 LSB are the message ID.
-    message.nodeId = (arbitrationId & 0b11111000000) >> 6;
-    message.id = arbitrationId & 0b00000111111;
+    // 6 MSB are the node ID. 5 LSB are the message ID.
+    message.nodeId = (arbitrationId & 0b11111100000) >> 5;
+    message.id = arbitrationId & 0b00000011111;
     for (int i = 0; i < dataLength; i++) {
         message.data = message.data << 8;
         message.data |= data[i];
