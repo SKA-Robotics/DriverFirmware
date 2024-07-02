@@ -59,6 +59,9 @@ void Motor_UpdateState(motor_t* motor) {
     float currentMeasurement = (motor->state.direction == FORWARD)
                                    ? scaled_adc_value
                                    : -scaled_adc_value;
+    if (motor->invertAxis) {
+        currentMeasurement = -currentMeasurement;
+    }
     motor->state.current =
         ApplyIirFilter(&motor->currentMeasurementFilter, currentMeasurement);
 }
