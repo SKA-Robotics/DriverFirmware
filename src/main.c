@@ -95,6 +95,8 @@ int main() {
     PlayAnimation();
     HAL_GPIO_WritePin(LED_PORT, LED_POWER_PIN, GPIO_PIN_SET);
     // Start the timers and CAN, begin working
+    DRV8873_WriteRegister(node0.drv8873, 0x02, 0b11011101);
+    DRV8873_WriteRegister(node1.drv8873, 0x02, 0b11011101);
     HAL_TIM_Base_Start_IT(&htim2);
     HAL_TIM_Base_Start_IT(&htim4);
     HAL_NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);

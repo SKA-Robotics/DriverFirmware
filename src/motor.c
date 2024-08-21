@@ -7,17 +7,17 @@ void Motor_SetDuty(motor_t* motor, float duty) {
     if (motor->invertAxis) {
         duty = -duty;
     }
-    uint32_t pwm = fabs(duty) * 1023;
+    uint32_t pwm = fabs(duty) * MAX_PWM;
     if (pwm > MAX_PWM) {
         pwm = MAX_PWM;
     }
     if (duty >= 0) {
         *(motor->pwmChannelForward) = pwm;
-        *(motor->pwmChannelReverse) = 0;
+        *(motor->pwmChannelReverse) = pwm;
         motor->state.direction = FORWARD;
     } else {
-        *(motor->pwmChannelForward) = 0;
-        *(motor->pwmChannelReverse) = pwm;
+        *(motor->pwmChannelForward) = MAX_PWM - pwm;
+        *(motor->pwmChannelReverse) = MAX_PWM - pwm;
         motor->state.direction = REVERSE;
     }
 }
