@@ -163,6 +163,7 @@ void MX_PWM_Init(void) {
     HAL_TIM_PWM_Init(&htim1);
     HAL_TIM_PWM_ConfigChannel(&htim1, &OC_InitStruct, TIM_CHANNEL_1);
     OC_InitStruct.OCPolarity = TIM_OCPOLARITY_LOW;
+    OC_InitStruct.Pulse = MAX_PWM;
     HAL_TIM_PWM_ConfigChannel(&htim1, &OC_InitStruct, TIM_CHANNEL_2);
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
@@ -176,8 +177,10 @@ void MX_PWM_Init(void) {
     htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     HAL_TIM_PWM_Init(&htim3);
     OC_InitStruct.OCPolarity = TIM_OCPOLARITY_HIGH;
+    OC_InitStruct.Pulse = 0;
     HAL_TIM_PWM_ConfigChannel(&htim3, &OC_InitStruct, TIM_CHANNEL_1);
     OC_InitStruct.OCPolarity = TIM_OCPOLARITY_LOW;
+    OC_InitStruct.Pulse = MAX_PWM;
     HAL_TIM_PWM_ConfigChannel(&htim3, &OC_InitStruct, TIM_CHANNEL_2);
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
