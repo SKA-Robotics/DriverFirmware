@@ -104,7 +104,9 @@ void RoboszponNode_StoppedStep(roboszpon_node_t* node) {
 
 void RoboszponNode_RunningStep(roboszpon_node_t* node) {
     if (node->flags != ROBOSZPON_NO_ERROR) { // Error detected
-        RoboszponNode_StopMotor(node);
+        if (node->flags & ROBOSZPON_ERROR_CMDTIMEOUT) {
+            RoboszponNode_StopMotor(node);
+        }
         if ((node->flags & ERROR_MASK) != ROBOSZPON_NO_ERROR) { // Crit. error
             HAL_GPIO_WritePin(node->errorLedPort, node->errorLedPin,
                               GPIO_PIN_SET);

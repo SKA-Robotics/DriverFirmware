@@ -55,6 +55,8 @@ void RoboszponConfig_LoadDefault(roboszpon_node_t* node) {
                                DEFAULT_INVERT_ENCODER);
     RoboszponConfig_WriteParam(node, PARAM_ENCODER_FILTER_WINDOW,
                                DEFAULT_ENCODER_FILTER_WINDOW);
+    RoboszponConfig_WriteParam(node, PARAM_DRV8873_SLEW_RATE,
+                               DEFAULT_DRV8873_SLEW_RATE);
 }
 
 void RoboszponConfig_WriteParam(roboszpon_node_t* node, uint8_t paramId,
@@ -193,6 +195,9 @@ void RoboszponConfig_WriteParam(roboszpon_node_t* node, uint8_t paramId,
     case PARAM_DISABLE_ENCODER_ERRORS:
         node->disableEncoderErrors = (value > 0.5f);
         break;
+    case PARAM_DRV8873_SLEW_RATE:
+        DRV8873_SetSlewRate(node->drv8873, value);
+        break;
     default:
         break;
     }
@@ -283,6 +288,8 @@ float RoboszponConfig_ReadParam(roboszpon_node_t* node, uint8_t paramId) {
         return MA730_GetFilterWindow(node->motor->encoder);
     case PARAM_DISABLE_ENCODER_ERRORS:
         return (node->disableEncoderErrors) ? 1.0f : 0.0f;
+    case PARAM_DRV8873_SLEW_RATE:
+        return DRV8873_GetSlewRate(node->drv8873);
     default:
         return 0.0f;
     }

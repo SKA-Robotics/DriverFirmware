@@ -40,7 +40,7 @@ roboszpon_node_t node0 = {.nodeId = MOTOR0_NODEID,
                           .motor = &motor0,
                           .motorController = &motorController0,
                           .messageQueue = &messageQueue0,
-                          .drv8873 = {CS_ENC0DRV0_PORT, CS_DRV0_PIN},
+                          .drv8873 = {CS_ENC1DRV1_PORT, CS_DRV1_PIN}, // Michał krejzolu zamieniłeś drv1 z drv0
                           .errorLedPort = LED_PORT,
                           .errorLedPin = LED_ENC0_PIN};
 roboszpon_node_t node1 = {.nodeId = MOTOR1_NODEID,
@@ -49,7 +49,7 @@ roboszpon_node_t node1 = {.nodeId = MOTOR1_NODEID,
                           .motor = &motor1,
                           .motorController = &motorController1,
                           .messageQueue = &messageQueue1,
-                          .drv8873 = {CS_ENC1DRV1_PORT, CS_DRV1_PIN},
+                          .drv8873 = {CS_ENC0DRV0_PORT, CS_DRV0_PIN},
                           .errorLedPort = LED_PORT,
                           .errorLedPin = LED_ENC1_PIN};
 
@@ -94,9 +94,11 @@ int main() {
 
     PlayAnimation();
     HAL_GPIO_WritePin(LED_PORT, LED_POWER_PIN, GPIO_PIN_SET);
+
+    uint8_t IC4_register = 0b00001011; // Disable ITRIP (just add more amps)
+    DRV8873_WriteRegister(node0.drv8873, 0x5, IC4_register);
+    DRV8873_WriteRegister(node1.drv8873, 0x5, IC4_register);
     // Start the timers and CAN, begin working
-    DRV8873_WriteRegister(node0.drv8873, 0x02, 0b11011101);
-    DRV8873_WriteRegister(node1.drv8873, 0x02, 0b11011101);
     HAL_TIM_Base_Start_IT(&htim2);
     HAL_TIM_Base_Start_IT(&htim4);
     HAL_NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);

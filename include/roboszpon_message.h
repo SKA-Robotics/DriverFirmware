@@ -63,6 +63,7 @@
 #define PARAM_INVERT_ENCODER 0x53
 #define PARAM_ENCODER_FILTER_WINDOW 0x54
 #define PARAM_DISABLE_ENCODER_ERRORS 0x55
+#define PARAM_DRV8873_SLEW_RATE 0x56
 // and many more ... Don't exceed 0x7f, as it wouldn't fit in the flash
 #define MIN_PARAM_ADDRESS 0x00
 #define MAX_PARAM_ADDRESS 0x7f

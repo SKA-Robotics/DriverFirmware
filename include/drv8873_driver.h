@@ -26,4 +26,7 @@ void DRV8873_WriteRegister(drv8873_device_t device, uint8_t registerAddress,
 
 uint8_t DRV8873_GetError(drv8873_device_t device);
 
+float DRV8873_GetSlewRate(drv8873_device_t device);
+void DRV8873_SetSlewRate(drv8873_device_t device, float value);
+
 #endif // DRV8873_DRIVER

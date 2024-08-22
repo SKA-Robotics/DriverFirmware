@@ -60,3 +60,16 @@ uint8_t DRV8873_GetError(drv8873_device_t device) {
     }
     return flags;
 }
+
+float DRV8873_GetSlewRate(drv8873_device_t device) {
+    uint8_t IC1_register = DRV8873_ReadRegister(device, 0x2);
+    uint8_t slewRate = (IC1_register & 0b00011100) >> 2;
+    return (float)slewRate;
+}
+
+void DRV8873_SetSlewRate(drv8873_device_t device, float value) {
+    uint8_t slewRate = (uint8_t)value;
+    if (slewRate > 7) {slewRate = 7;}
+    uint8_t IC1_register = 0b11000001 | ((slewRate & 0b111) << 2);
+    DRV8873_WriteRegister(device, 0x2, IC1_register);
+}
