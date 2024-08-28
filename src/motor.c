@@ -4,21 +4,22 @@
 
 void Motor_SetDuty(motor_t* motor, float duty) {
     motor->state.duty = duty;
-    if (fabsf(duty) < 0.001f) { // Totally stop the motor
-        *(motor->pwmChannelForward) = 0;
-        *(motor->pwmChannelReverse) = MAX_PWM;
-        return;
-    }
     if (motor->invertAxis) {
         duty = -duty;
     }
-    uint32_t pwm = (1.0f + duty) * 0.5f * MAX_PWM; // This mapping is needed, as we use Lock Anti-Phase drive
+    uint32_t pwm = fabs(duty) * MAX_PWM;
     if (pwm > MAX_PWM) {
         pwm = MAX_PWM;
     }
-    *(motor->pwmChannelForward) = pwm;
-    *(motor->pwmChannelReverse) = pwm;
-    motor->state.direction = (duty >= 0) ? FORWARD : REVERSE;
+    if (duty >= 0) {
+        *(motor->pwmChannelForward) = pwm;
+        *(motor->pwmChannelReverse) = 0;
+        motor->state.direction = FORWARD;
+    } else {
+        *(motor->pwmChannelForward) = 0;
+        *(motor->pwmChannelReverse) = pwm;
+        motor->state.direction = REVERSE;
+    }
 }
 
 void Motor_UpdateState(motor_t* motor) {

@@ -149,7 +149,7 @@ void MX_PWM_Init(void) {
     __HAL_RCC_TIM1_CLK_ENABLE();
     htim1.Instance = TIM1;
     htim1.Init.Period = MAX_PWM;
-    htim1.Init.Prescaler = 16; // Tick every 1/36 microsecond (used for us delay) [DEPRECATED COMMENT]
+    htim1.Init.Prescaler = 16; // Tick every 4/9 microsecond (used for us delay)
     htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -162,8 +162,6 @@ void MX_PWM_Init(void) {
     };
     HAL_TIM_PWM_Init(&htim1);
     HAL_TIM_PWM_ConfigChannel(&htim1, &OC_InitStruct, TIM_CHANNEL_1);
-    OC_InitStruct.OCPolarity = TIM_OCPOLARITY_LOW;
-    OC_InitStruct.Pulse = MAX_PWM;
     HAL_TIM_PWM_ConfigChannel(&htim1, &OC_InitStruct, TIM_CHANNEL_2);
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
@@ -176,11 +174,7 @@ void MX_PWM_Init(void) {
     htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     HAL_TIM_PWM_Init(&htim3);
-    OC_InitStruct.OCPolarity = TIM_OCPOLARITY_HIGH;
-    OC_InitStruct.Pulse = 0;
     HAL_TIM_PWM_ConfigChannel(&htim3, &OC_InitStruct, TIM_CHANNEL_1);
-    OC_InitStruct.OCPolarity = TIM_OCPOLARITY_LOW;
-    OC_InitStruct.Pulse = MAX_PWM;
     HAL_TIM_PWM_ConfigChannel(&htim3, &OC_InitStruct, TIM_CHANNEL_2);
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
@@ -312,7 +306,7 @@ void DelayMicroseconds(uint16_t us) {
     uint32_t start =
         __HAL_TIM_GET_COUNTER(&htim1); // Capture the starting counter value
     uint32_t target =
-        36 * (uint32_t)us; // The target delay in microseconds (timer ticks
+        3 * (uint32_t)us; // The target delay in microseconds (timer ticks
                            // 36 times per microsecond)
     while ((__HAL_TIM_GET_COUNTER(&htim1) - start) < target) {
         // Handle timer overflow
